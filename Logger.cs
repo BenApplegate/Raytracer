@@ -9,11 +9,11 @@ public static class Logger
         var method = new StackTrace().GetFrame(1)?.GetMethod();
         if (method is not null)
         {
-            Console.WriteLine($"INFO {{{method.ReflectedType?.Name}:{method.Name}}}: {message}");
+            Console.WriteLine($"INFO {{{method.ReflectedType?.Name}:{method.Name}}} {{{DateTime.Now}}}: {message}");
         }
         else
         {
-            Console.WriteLine($"INFO {{UnknownClass:UnknownMethod}}: {message}");
+            Console.WriteLine($"INFO {{UnknownClass:UnknownMethod}} {{{DateTime.Now}}}: {message}");
         }
     }
 
@@ -24,11 +24,11 @@ public static class Logger
         var method = new StackTrace().GetFrame(1)?.GetMethod();
         if (method is not null)
         {
-            Console.WriteLine($"WARN {{{method.ReflectedType?.Name}:{method.Name}}}: {message}");
+            Console.WriteLine($"WARN {{{method.ReflectedType?.Name}:{method.Name}}} {{{DateTime.Now}}}: {message}");
         }
         else
         {
-            Console.WriteLine($"WARN {{UnknownClass:UnknownMethod}}: {message}");
+            Console.WriteLine($"WARN {{UnknownClass:UnknownMethod}} {{{DateTime.Now}}}: {message}");
         }
 
         Console.ForegroundColor = oldColor;
@@ -41,11 +41,11 @@ public static class Logger
         var method = new StackTrace().GetFrame(1)?.GetMethod();
         if (method is not null)
         {
-            Console.Error.WriteLine($"ERROR {{{method.ReflectedType?.Name}:{method.Name}}}: {message}");
+            Console.Error.WriteLine($"ERROR {{{method.ReflectedType?.Name}:{method.Name}}} {{{DateTime.Now}}}: {message}");
         }
         else
         {
-            Console.Error.WriteLine($"ERROR {{UnknownClass:UnknownMethod}}: {message}");
+            Console.Error.WriteLine($"ERROR {{UnknownClass:UnknownMethod}} {{{DateTime.Now}}}: {message}");
         }
 
         Console.ForegroundColor = oldColor;
