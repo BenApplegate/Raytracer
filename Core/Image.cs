@@ -15,11 +15,11 @@ public class Image
             {
                 if ((x/15 + y/15) % 2 == 0)
                 {
-                    SetPixel(x, y, 1, 0, 1);
+                    SetPixel(x, y, new Color(1, 0, 1));
                 }
                 else
                 {
-                    SetPixel(x, y, 0, 0, 0);
+                    SetPixel(x, y, new Color(0, 0, 0));
                 }
             }
         }
@@ -44,11 +44,11 @@ public class Image
         r = uint.Clamp(r, 0, 255);
         g = uint.Clamp(g, 0, 255);
         b = uint.Clamp(b, 0, 255);
-        _bitmap.SetPixel(x, y, Color.FromArgb((int) r, (int) g, (int) b));
+        _bitmap.SetPixel(x, y, System.Drawing.Color.FromArgb((int) r, (int) g, (int) b));
     }
 
-    public void SetPixel(int x, int y, float r, float g, float b)
+    public void SetPixel(int x, int y, Color color)
     {
-        SetPixelRGB(x, y, (uint)(r * 255), (uint)(g * 255), (uint)(b * 255));
+        _bitmap.SetPixel(x, y, color.ToSystemColor());
     }
 }

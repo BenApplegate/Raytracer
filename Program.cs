@@ -1,4 +1,5 @@
-﻿using Raytracer;
+﻿using System.Numerics;
+using Raytracer;
 using Raytracer.Core;
 
 class Program
@@ -7,7 +8,9 @@ class Program
     {
         Logger.Info("Raytracer Initializing");
 
-        Image img = new Image(1920, 1080);
-        img.SaveToFile("test.png");
+        Scene scene = new Scene("BasicScene");
+        scene.AddCamera(new Camera());
+        scene.AddCamera(new Camera(new Vector3(0, 0, -5), new Vector3(0, 0, 0), 90, 1080, 720));
+        scene.SaveAllCameras();
     }
 }
