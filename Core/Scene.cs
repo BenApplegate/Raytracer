@@ -18,6 +18,17 @@ public class Scene
         _cameras.Add(cam);
     }
 
+    public void RenderCamera(int camIndex)
+    {
+        if (camIndex < 0 || camIndex >= _cameras.Count)
+        {
+            Logger.Warn("Selected camera is outside of range. Cannot render");
+            return;
+        }
+        
+        
+    }
+
     public void SaveAllCameras(string location = "")
     {
         for(int i = 0; i < _cameras.Count; i++)

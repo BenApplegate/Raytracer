@@ -11,6 +11,11 @@ public class Camera
     private int _canvasXResolution;
     private int _canvasYResolution;
     private Image _canvas;
+
+    private float Lerp(float a, float b, float t)
+    {
+        return (a * (1 - t)) + (b * t);
+    }
     
     public Camera(Vector3 location, Vector3 rotation, float fov, int xRes, int yRes)
     {
@@ -39,5 +44,33 @@ public class Camera
     public void SaveImage(string filename)
     {
         _canvas.SaveToFile(filename);
+    }
+
+    public List<Ray> GetCameraRays()
+    {
+        List<Ray> rays = new List<Ray>();
+        
+        for (int y = 0; y < _canvasYResolution; y++)
+        {
+            for (int x = 0; x < _canvasXResolution; x++)
+            {
+                float degreesToRad = MathF.PI / 180f;
+                
+                float hOffset = Lerp(-1 * (_hFov) / 2, _hFov / 2, (float)x / (_canvasXResolution - 1));
+                float vOffset = Lerp(-1 * (_vFov / 2), _vFov / 2, (float)y / (_canvasYResolution - 1));
+
+                float zPos = MathF.Cos((vOffset + _rotation.X) * degreesToRad) *
+                             MathF.Cos((hOffset + _rotation.Y) * degreesToRad);
+                
+                float xPos = MathF.Cos((vOffset + _rotation.X) * degreesToRad) *
+                             MathF.Sin((hOffset + _rotation.Y) * degreesToRad);
+
+                float yPos = MathF.Sin((vOffset + _rotation.X) * degreesToRad);
+                
+                rays.Add(new Ray(_location, new Vector3(xPos, yPos, zPos)));
+            }
+        }
+
+        return rays;
     }
 }
