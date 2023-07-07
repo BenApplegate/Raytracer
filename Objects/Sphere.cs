@@ -7,26 +7,28 @@ namespace Raytracer.Objects;
 
 public class Sphere : Renderable
 {
-    private Vector3 location;
-    private float radius;
+    private Vector3 _location;
+    private float _radius;
+    private Material _material;
 
-    public Sphere(Vector3 location, float radius)
+    public Sphere(Vector3 location, float radius, Material material)
     {
-        this.location = location;
-        this.radius = radius;
+        this._location = location;
+        this._radius = radius;
+        this._material = material;
     }
     
     //Thanks to The Art of Code youtube channel for
     //Ray-Sphere Intersection math
     //https://www.youtube.com/watch?v=HFPlKQGChpE
-    public RayHit Render(Ray ray)
+    public RayHit Render(ref Ray ray)
     {
-        Vector3 rayOrigin = ray.origin - location;
+        Vector3 rayOrigin = ray.origin - _location;
 
         //Use dot product to find t value of point on line closest to center
         float tCenter = -Vector3.Dot(rayOrigin, ray.direction);
         float centerDistance = (rayOrigin + ray.direction * tCenter).Length();
-        float underSqrt = radius * radius - centerDistance * centerDistance;
+        float underSqrt = _radius * _radius - centerDistance * centerDistance;
 
         if (underSqrt < 0)
         {
@@ -50,6 +52,9 @@ public class Sphere : Renderable
         //Calculate normal by finding location of hit around unit sphere
         Vector3 normalHitPos = rayOrigin + ray.direction * firstIntersection;
         Vector3 normalVector = normalHitPos / normalHitPos.Length();
-        return new RayHit() { didHit = true, hitLocation = hitPos, distance = distance, hitNormal = normalVector};
+
+        RayHit hit = new RayHit() { didHit = true, hitLocation = hitPos, distance = distance, hitNormal = normalVector, material = _material};
+        
+        return hit;
     }
 }

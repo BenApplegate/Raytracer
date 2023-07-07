@@ -54,21 +54,34 @@ public class Scene
 
             foreach (Renderable obj in _renderables)
             {
-                hits.Add(obj.Render(ray));
+                hits.Add(obj.Render(ref ray));
             }
 
-            
+            bool hitSomething = false;
+            RayHit closestHit = new RayHit();
+            float closestDistance = float.PositiveInfinity;
             foreach (var hit in hits)
             {
                 if (hit.didHit)
                 {
                     hitCount++;
-                    ray.canvasColor = new Color(hit.hitNormal.X, hit.hitNormal.Y, hit.hitNormal.Z);
-                    
-                    rays[i] = ray;
+                    hitSomething = true;
+                    if (hit.distance < closestDistance)
+                    {
+                        closestDistance = hit.distance;
+                        closestHit = hit;
+                    }
                 }
             }
             
+            //Process lighting info for hit
+            if (hitSomething)
+            {
+                closestHit.material?.ProcessLighting(ref ray, ref closestHit);
+            }
+            
+            //Actually save updated ray info
+            rays[i] = ray;
         }
         
         Logger.Info($"Found {hitCount} hits");

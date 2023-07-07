@@ -8,18 +8,23 @@ public class Color
 
     public Color(float r, float g, float b)
     {
-        this.r = float.Clamp(r, 0, 1);
-        this.g = float.Clamp(g, 0, 1);
-        this.b = float.Clamp(b, 0, 1);
+        this.r = r;
+        this.g = g;
+        this.b = b;
     }
 
     public System.Drawing.Color ToSystemColor()
     {
-        return System.Drawing.Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
+        return System.Drawing.Color.FromArgb((int)(float.Clamp(r, 0, 1) * 255), (int)(float.Clamp(float.Clamp(g, 0, 1), 0, 1) * 255), (int)(float.Clamp(b, 0, 1) * 255));
     }
 
     public static Color operator*(Color a, Color b)
     {
         return new Color(a.r * b.r, a.g * b.g, a.b * b.b);
+    }
+
+    public static Color operator +(Color a, Color b)
+    {
+        return new Color(a.r + b.r, a.g + b.g, a.b + b.b);
     }
 }

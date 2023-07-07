@@ -9,5 +9,6 @@ public struct Ray
     public Vector3 direction;
     public int canvasX;
     public int canvasY;
-    public Color? canvasColor;
+    public Color color;
+    public Color gatheredColor;
 }

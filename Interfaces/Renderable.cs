@@ -6,5 +6,5 @@ namespace Raytracer.Interfaces;
 
 public interface Renderable
 {
-    public RayHit Render(Ray ray);
+    public RayHit Render(ref Ray ray);
 }

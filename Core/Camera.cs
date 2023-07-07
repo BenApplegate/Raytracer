@@ -51,11 +51,7 @@ public class Camera
     {
         foreach (Ray ray in rays)
         {
-            if (ray.canvasColor is null)
-            {
-                continue;
-            }
-            _canvas.SetPixel(ray.canvasX, ray.canvasY, ray.canvasColor);
+            _canvas.SetPixel(ray.canvasX, ray.canvasY, ray.gatheredColor);
         }
     }
     
@@ -85,7 +81,9 @@ public class Camera
                     origin = _location,
                     direction = new Vector3(xPos, yPos, zPos),
                     canvasX = x,
-                    canvasY = y
+                    canvasY = y,
+                    color = new Color(1, 1, 1),
+                    gatheredColor = new Color(0, 0, 0)
                 });
             }
         }
