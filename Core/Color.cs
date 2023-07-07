@@ -8,9 +8,9 @@ public class Color
 
     public Color(float r, float g, float b)
     {
-        this.r = r;
-        this.g = g;
-        this.b = b;
+        this.r = float.Clamp(r, 0, 1);
+        this.g = float.Clamp(g, 0, 1);
+        this.b = float.Clamp(b, 0, 1);
     }
 
     public System.Drawing.Color ToSystemColor()

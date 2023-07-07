@@ -1,15 +1,13 @@
 ﻿using System.Numerics;
+using Raytracer.Core;
 
-namespace Raytracer.Core;
+namespace Raytracer.Structs;
 
 public struct Ray
 {
     public Vector3 origin;
     public Vector3 direction;
-
-    public Ray(Vector3 origin, Vector3 direction)
-    {
-        this.origin = origin;
-        this.direction = direction;
-    }
+    public int canvasX;
+    public int canvasY;
+    public Color? canvasColor;
 }

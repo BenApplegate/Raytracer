@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Raytracer.Structs;
 
 namespace Raytracer.Core;
 
@@ -46,6 +47,18 @@ public class Camera
         _canvas.SaveToFile(filename);
     }
 
+    public void HandleProcessedRays(List<Ray> rays)
+    {
+        foreach (Ray ray in rays)
+        {
+            if (ray.canvasColor is null)
+            {
+                continue;
+            }
+            _canvas.SetPixel(ray.canvasX, ray.canvasY, ray.canvasColor);
+        }
+    }
+    
     public List<Ray> GetCameraRays()
     {
         List<Ray> rays = new List<Ray>();
@@ -65,9 +78,15 @@ public class Camera
                 float xPos = MathF.Cos((vOffset + _rotation.X) * degreesToRad) *
                              MathF.Sin((hOffset + _rotation.Y) * degreesToRad);
 
-                float yPos = MathF.Sin((vOffset + _rotation.X) * degreesToRad);
+                float yPos = -MathF.Sin((vOffset + _rotation.X) * degreesToRad);
                 
-                rays.Add(new Ray(_location, new Vector3(xPos, yPos, zPos)));
+                rays.Add(new Ray()
+                {
+                    origin = _location,
+                    direction = new Vector3(xPos, yPos, zPos),
+                    canvasX = x,
+                    canvasY = y
+                });
             }
         }
 

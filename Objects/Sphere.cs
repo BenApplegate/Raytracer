@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Raytracer.Core;
 using Raytracer.Interfaces;
+using Raytracer.Structs;
 
 namespace Raytracer.Objects;
 
@@ -23,7 +24,7 @@ public class Sphere : Renderable
         Vector3 rayOrigin = ray.origin - location;
 
         //Use dot product to find t value of point on line closest to center
-        float tCenter = Vector3.Dot(rayOrigin, ray.direction);
+        float tCenter = -Vector3.Dot(rayOrigin, ray.direction);
         float centerDistance = (rayOrigin + ray.direction * tCenter).Length();
         float underSqrt = radius * radius - centerDistance * centerDistance;
 
@@ -49,7 +50,6 @@ public class Sphere : Renderable
         //Calculate normal by finding location of hit around unit sphere
         Vector3 normalHitPos = rayOrigin + ray.direction * firstIntersection;
         Vector3 normalVector = normalHitPos / normalHitPos.Length();
-        return new RayHit() { didHit = false, hitLocation = hitPos, distance = distance, hitNormal = normalVector};
+        return new RayHit() { didHit = true, hitLocation = hitPos, distance = distance, hitNormal = normalVector};
     }
-    
 }
