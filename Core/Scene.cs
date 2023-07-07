@@ -28,6 +28,14 @@ public class Scene
         Logger.Info("Adding Renderable to scene");
         _renderables.Add(obj);
     }
+
+    public void RenderAllCameras()
+    {
+        for (int i = 0; i < _cameras.Count; i++)
+        {
+            RenderCamera(i);
+        }
+    }
     
     public void RenderCamera(int camIndex)
     {
