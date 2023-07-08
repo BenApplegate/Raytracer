@@ -44,7 +44,7 @@ public class SkyEnvironmentMaterial : Material
 
         float t = Vector3.Dot(ray.direction, new Vector3(0, 1, 0));
         
-        if (t < -.1)
+        if (t < 0)
         {
             if (ray.bounces == 0)
             {

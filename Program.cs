@@ -4,6 +4,7 @@ using Raytracer;
 using Raytracer.Core;
 using Raytracer.Materials;
 using Raytracer.Objects;
+using Plane = Raytracer.Objects.Plane;
 
 class Program
 {
@@ -14,22 +15,57 @@ class Program
 
         Scene scene = new Scene("BasicScene");
 
-        //TEST UNLIT SCENE
-        // SetupCameraRing(10, 32, ref scene);
-        //
-        // scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1, new UnlitMaterial(new Color(0f, 0, 1f))));
-        // scene.AddRenderable(new Sphere(new Vector3(0, 0, -2), .25f, new UnlitMaterial(new Color(0f, 1, 0))));
-        // scene.AddRenderable(new Sphere(new Vector3(0, 0, 3), .5f, new UnlitMaterial(new Color(1f, 0, 0f))));
-        // scene.AddRenderable(new Sphere(new Vector3(5, 1, 0), 2f, new UnlitMaterial(new Color(1f, 1, 0f))));
-        // scene.AddRenderable(new Sphere(new Vector3(-3, -2, 0), 1f, new UnlitMaterial(new Color(0f, 1, 1f))));
+        int samples = 50;
         
-        //TEST BASIC DIFFUSE
-        // scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 80, 1920, 1080));
-        //
-        // scene.AddRenderable(new Sphere(new Vector3(0, -101, 0), 100, new DiffuseMaterial(new Color(0, .2f, 1))));
-        // scene.AddRenderable(new Sphere(new Vector3(-2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 40)));
-        // scene.AddRenderable(new Sphere(new Vector3(2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 20)));
+        //UnlitTestScene(scene, samples);
 
+        //BasicDiffuseScene(scene, samples);
+
+        //ComplexDiffuseScene(scene, samples);
+
+        PlaneTestScene(scene, samples);
+
+        scene.SaveAllCameras(samples);
+    }
+
+    private static void PlaneTestScene(Scene scene, int samples)
+    {
+        scene.AddCamera(new Camera(new Vector3(0, 0, -5), new Vector3(0, 0, 0), 80, 1280, 720));
+        scene.SetEnvironment(new SkyEnvironmentMaterial());
+        
+        scene.AddRenderable(new Plane(new Vector3(-.5f, 1, 0), new Vector3(0, -1.5f, 0), new DiffuseMaterial(new Color(1f, 1f, 1f))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1, new DiffuseMaterial(new Color(1, .3f, 1))));
+        
+        scene.RenderAllCameras(2, samples, 12);
+    }
+    
+    private static void BasicDiffuseScene(Scene scene, int samples)
+    {
+        //TEST BASIC DIFFUSE
+        scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 80, 1920, 1080));
+
+        scene.AddRenderable(new Sphere(new Vector3(0, -101, 0), 100, new DiffuseMaterial(new Color(0, .2f, 1))));
+        scene.AddRenderable(new Sphere(new Vector3(-2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 40)));
+        scene.AddRenderable(new Sphere(new Vector3(2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 20)));
+
+        scene.RenderAllCameras(1, samples, 16);
+    }
+
+    private static void UnlitTestScene(Scene scene, int samples)
+    {
+        SetupCameraRing(10, 32, ref scene);
+
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1, new UnlitMaterial(new Color(0f, 0, 1f))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, -2), .25f, new UnlitMaterial(new Color(0f, 1, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, 3), .5f, new UnlitMaterial(new Color(1f, 0, 0f))));
+        scene.AddRenderable(new Sphere(new Vector3(5, 1, 0), 2f, new UnlitMaterial(new Color(1f, 1, 0f))));
+        scene.AddRenderable(new Sphere(new Vector3(-3, -2, 0), 1f, new UnlitMaterial(new Color(0f, 1, 1f))));
+
+        scene.RenderAllCameras(1, samples, 16);
+    }
+
+    private static void ComplexDiffuseScene(Scene scene, int samples)
+    {
         //TEST COMPLEX DIFFUSE
         scene.AddRenderable(new Sphere(new Vector3(0, -20, 0), 23, new DiffuseMaterial(new Color(1, 1, 1))));
         scene.AddRenderable(new Sphere(new Vector3(0, 5, 0), 1.5f, new DiffuseMaterial(new Color(1, .1f, .1f))));
@@ -41,7 +77,7 @@ class Program
         Camera cam1 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
         Camera cam2 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
         Camera cam3 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
-        
+
         scene.AddCamera(cam1);
         scene.AddCamera(cam2);
         scene.AddCamera(cam3);
@@ -49,25 +85,22 @@ class Program
         cam1.AddStartingImage("BasicScene_cam0.png");
         cam2.AddStartingImage("BasicScene_cam1.png");
         cam3.AddStartingImage("BasicScene_cam2.png");
-        
+
         var stopwatch = Stopwatch.StartNew();
-
-        int samples = 10;
-        scene.RenderCamera(0, 1, samples, 16);
-        stopwatch.Stop();
-        Logger.Warn($"Render took {stopwatch.Elapsed}");
+        
+        // scene.RenderCamera(0, 1, samples, 16);
+        // stopwatch.Stop();
+        // Logger.Warn($"Render took {stopwatch.Elapsed}");
+        //
+        // stopwatch = Stopwatch.StartNew();
+        // scene.RenderCamera(1, 2, samples, 16);
+        // stopwatch.Stop();
+        // Logger.Warn($"Render took {stopwatch.Elapsed}");
 
         stopwatch = Stopwatch.StartNew();
-        scene.RenderCamera(1, 2, samples, 16);
+        scene.RenderCamera(2, 3, samples, 16);
         stopwatch.Stop();
         Logger.Warn($"Render took {stopwatch.Elapsed}");
-
-        stopwatch = Stopwatch.StartNew();
-        scene.RenderCamera(2, 5, samples, 16);
-        stopwatch.Stop();
-        Logger.Warn($"Render took {stopwatch.Elapsed}");
-
-        scene.SaveAllCameras(samples);
     }
 
     public static void SetupCameraRing(float radius, int count, ref Scene scene)
