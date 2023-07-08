@@ -29,15 +29,15 @@ public class Scene
         _renderables.Add(obj);
     }
 
-    public void RenderAllCameras()
+    public void RenderAllCameras(int maxLightBounces)
     {
         for (int i = 0; i < _cameras.Count; i++)
         {
-            RenderCamera(i);
+            RenderCamera(i, maxLightBounces);
         }
     }
     
-    public void RenderCamera(int camIndex)
+    public void RenderCamera(int camIndex, int maxLightBounces)
     {
         if (camIndex < 0 || camIndex >= _cameras.Count)
         {
@@ -56,50 +56,55 @@ public class Scene
             {
                 Logger.Info($"Now running ray {i+1}/{rays.Count}");
             }
-            
-            List<RayHit> hits = new List<RayHit>();
-            Ray ray = rays[i];
-            
-            //Call render object for each renderable object
-            foreach (Renderable obj in _renderables)
-            {
-                hits.Add(obj.Render(ref ray));
-            }
 
-            //Find the closest found hit to get correct location
-            bool hitSomething = false;
-            RayHit closestHit = new RayHit();
-            float closestDistance = float.PositiveInfinity;
-            foreach (var hit in hits)
+            //repeat tracing for every allowed light bounce
+            for (int bounce = 0; bounce <= maxLightBounces; bounce++)
             {
-                if (hit.didHit)
+                List<RayHit> hits = new List<RayHit>();
+                Ray ray = rays[i];
+            
+                //Call render object for each renderable object
+                foreach (Renderable obj in _renderables)
                 {
-                    hitCount++;
-                    hitSomething = true;
-                    if (hit.distance < closestDistance)
+                    hits.Add(obj.Render(ref ray));
+                }
+
+                //Find the closest found hit to get correct location
+                bool hitSomething = false;
+                RayHit closestHit = new RayHit();
+                float closestDistance = float.PositiveInfinity;
+                foreach (var hit in hits)
+                {
+                    if (hit.didHit)
                     {
-                        closestDistance = hit.distance;
-                        closestHit = hit;
+                        hitCount++;
+                        hitSomething = true;
+                        if (hit.distance < closestDistance)
+                        {
+                            closestDistance = hit.distance;
+                            closestHit = hit;
+                        }
                     }
                 }
-            }
             
-            if (hitSomething)
-            {
-                //Process lighting info for hit
-                closestHit.material?.ProcessLighting(ref ray, ref closestHit);
+                if (hitSomething)
+                {
+                    //Process lighting info for hit
+                    closestHit.material?.ProcessLighting(ref ray, ref closestHit);
                 
-                closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
-            }
+                    closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
+                }
 
-            //Update bounce count
-            if (closestHit.rayShouldContinue)
-            {
-                ray.bounces++;
+                //Update bounce count
+                if (closestHit.rayShouldContinue)
+                {
+                    ray.bounces++;
+                }
+            
+                //Actually save updated ray info
+                rays[i] = ray;
             }
             
-            //Actually save updated ray info
-            rays[i] = ray;
         }
         
         Logger.Info($"Found {hitCount} hits");
