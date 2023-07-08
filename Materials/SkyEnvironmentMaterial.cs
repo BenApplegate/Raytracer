@@ -8,7 +8,7 @@ namespace Raytracer.Materials;
 public class SkyEnvironmentMaterial : Material
 {
     
-    Color nightColor = new Color(0.1f, .1f, .1f);
+    Color nightColor = new Color(0.3f, .3f, .3f);
     float nightStrength = .1f;
 
     Color highDayColor = new Color(.01f, 85f / 255, 1);

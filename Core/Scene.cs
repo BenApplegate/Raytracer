@@ -102,7 +102,7 @@ public class Scene
         
         Logger.Info($"Finished Rendering Camera");
         //Send rays back to camera to save
-        _cameras[camIndex].HandleProcessedRays(rays);
+        _cameras[camIndex].HandleProcessedRays(rays, sampleCount);
     }
 
     private void TraceRay(int maxLightBounces, int sampleCount, List<Ray> rays, int rayIndex)
@@ -192,11 +192,11 @@ public class Scene
         rays[rayIndex] = finalRay;
     }
 
-    public void SaveAllCameras(string location = "")
+    public void SaveAllCameras(int samples, string location = "")
     {
         for(int i = 0; i < _cameras.Count; i++)
         {
-            _cameras[i].SaveImage(location+$"{_name}_cam{i}.png");
+            _cameras[i].SaveImage(location+$"{_name}_cam{i}.png", samples);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Net;
+using System.Numerics;
 using Raytracer.Structs;
 
 namespace Raytracer.Core;
@@ -12,6 +14,8 @@ public class Camera
     private int _canvasXResolution;
     private int _canvasYResolution;
     private Image _canvas;
+    private Bitmap? _startingImage = null;
+    private int? _startingImageSampleCount = null;
 
     private float Lerp(float a, float b, float t)
     {
@@ -42,16 +46,57 @@ public class Camera
         _canvas = new Image(1920, 1080);
     }
 
-    public void SaveImage(string filename)
+    public void SaveImage(string filename, int samples)
     {
+        _startingImage?.Dispose();
+        
+        File.WriteAllText($"{filename}.state", (samples + (_startingImageSampleCount ?? 0)).ToString());
+        
         _canvas.SaveToFile(filename);
     }
 
-    public void HandleProcessedRays(List<Ray> rays)
+    public void AddStartingImage(string filename)
+    {
+        if (!File.Exists(filename))
+        {
+            Logger.Warn("Could not find provided starter image");
+            return;
+        }
+
+        if (!File.Exists($"{filename}.state"))
+        {
+            Logger.Warn("Could not find renderer state file, cannot continue previous render");
+            return;
+        }
+        
+        Bitmap img = new Bitmap(filename);
+        if (_canvasXResolution != img.Width || _canvasYResolution != img.Height)
+        {
+            Logger.Warn("Provided starter image has wrong resolution, cannot be used");
+            return;
+        }
+
+        string state = File.ReadAllText($"{filename}.state");
+        int existingSamples = int.Parse(state);
+        Logger.Info($"Resuming image with {existingSamples} samples");
+
+        _startingImage = img;
+        _startingImageSampleCount = existingSamples;
+    }
+
+    public void HandleProcessedRays(List<Ray> rays, int samples)
     {
         foreach (Ray ray in rays)
         {
-            _canvas.SetPixel(ray.canvasX, ray.canvasY, ray.gatheredColor);
+            Color c = ray.gatheredColor;
+            if (_startingImage is not null)
+            {
+                var pColor = _startingImage.GetPixel(ray.canvasX, ray.canvasY);
+                c *= samples;
+                c += new Color(pColor.R / 255f, pColor.G / 255f, pColor.B / 255f) * _startingImageSampleCount!.Value;
+                c /= samples + _startingImageSampleCount!.Value;
+            }
+            _canvas.SetPixel(ray.canvasX, ray.canvasY, c);
         }
     }
     
