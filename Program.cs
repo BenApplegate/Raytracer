@@ -23,10 +23,10 @@ class Program
         scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 80, 1920, 1080));
         
         scene.AddRenderable(new Sphere(new Vector3(0, -101, 0), 100, new DiffuseMaterial(new Color(0, .2f, 1))));
-        scene.AddRenderable(new Sphere(new Vector3(-2, 2, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 1)));
-        scene.AddRenderable(new Sphere(new Vector3(2, 2, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 1)));
+        scene.AddRenderable(new Sphere(new Vector3(-2, 2, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 20)));
+        scene.AddRenderable(new Sphere(new Vector3(2, 2, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 10)));
         
-        scene.RenderAllCameras(1);
+        scene.RenderAllCameras(1, 100);
         
         scene.SaveAllCameras();
     }

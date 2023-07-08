@@ -32,4 +32,9 @@ public class Color
     {
         return new Color(a.r * b, a.g * b, a.b * b);
     }
+    
+    public static Color operator /(Color a, float b)
+    {
+        return new Color(a.r / b, a.g / b, a.b / b);
+    }
 }
