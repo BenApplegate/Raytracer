@@ -10,4 +10,5 @@ public struct RayHit
     public float distance;
     public Vector3 hitNormal;
     public Material material;
+    public bool rayShouldContinue;
 }

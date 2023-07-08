@@ -11,4 +11,5 @@ public struct Ray
     public int canvasY;
     public Color color;
     public Color gatheredColor;
+    public int bounces;
 }

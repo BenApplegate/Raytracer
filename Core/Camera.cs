@@ -83,7 +83,8 @@ public class Camera
                     canvasX = x,
                     canvasY = y,
                     color = new Color(1, 1, 1),
-                    gatheredColor = new Color(0, 0, 0)
+                    gatheredColor = new Color(0, 0, 0),
+                    bounces = 0
                 });
             }
         }

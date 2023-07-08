@@ -59,12 +59,14 @@ public class Scene
             
             List<RayHit> hits = new List<RayHit>();
             Ray ray = rays[i];
-
+            
+            //Call render object for each renderable object
             foreach (Renderable obj in _renderables)
             {
                 hits.Add(obj.Render(ref ray));
             }
 
+            //Find the closest found hit to get correct location
             bool hitSomething = false;
             RayHit closestHit = new RayHit();
             float closestDistance = float.PositiveInfinity;
@@ -82,10 +84,18 @@ public class Scene
                 }
             }
             
-            //Process lighting info for hit
             if (hitSomething)
             {
+                //Process lighting info for hit
                 closestHit.material?.ProcessLighting(ref ray, ref closestHit);
+                
+                closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
+            }
+
+            //Update bounce count
+            if (closestHit.rayShouldContinue)
+            {
+                ray.bounces++;
             }
             
             //Actually save updated ray info

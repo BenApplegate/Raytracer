@@ -53,7 +53,7 @@ public class Sphere : Renderable
         Vector3 normalHitPos = rayOrigin + ray.direction * firstIntersection;
         Vector3 normalVector = normalHitPos / normalHitPos.Length();
 
-        RayHit hit = new RayHit() { didHit = true, hitLocation = hitPos, distance = distance, hitNormal = normalVector, material = _material};
+        RayHit hit = new RayHit() { didHit = true, hitLocation = hitPos, distance = distance, hitNormal = normalVector, material = _material, rayShouldContinue = true};
         
         return hit;
     }

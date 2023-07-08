@@ -4,21 +4,21 @@ using Raytracer.Structs;
 
 namespace Raytracer.Materials;
 
-public class UnlitMaterial : Material
+public class EmissiveMaterial : Material
 {
     private Color _color;
+    private float _strength;
 
-    public UnlitMaterial(Color color)
+    public EmissiveMaterial(Color color, float strength)
     {
         _color = color;
+        _strength = strength;
     }
-    
+
     public void ProcessLighting(ref Ray ray, ref RayHit hit)
     {
-        if(ray.bounces != 0) return;
-        
         ray.color *= _color;
-        ray.gatheredColor += _color;
+        ray.gatheredColor += (ray.color * _strength);
     }
 
     public void UpdateNextRay(ref Ray ray, ref RayHit hit)
