@@ -18,4 +18,9 @@ public static class Utility
 
         return new Vector3(x, y, z);
     }
+
+    public static float ComponentSum(this Vector3 v)
+    {
+        return v.X + v.Y + v.Z;
+    }
 }

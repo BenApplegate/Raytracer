@@ -9,6 +9,7 @@ class Program
 {
     public static void Main(string[] args)
     {
+
         Logger.Info("Raytracer Initializing");
 
         Scene scene = new Scene("BasicScene");
@@ -35,7 +36,7 @@ class Program
         scene.AddRenderable(new Sphere(new Vector3(3, 4.5f, 1), 1, new DiffuseMaterial(new Color(.1f, .1f, 1))));
         scene.AddRenderable(new Sphere(new Vector3(-4, 4, -.5f), .75f, new DiffuseMaterial(new Color(.1f, 1, .1f))));
         //scene.AddRenderable(new Sphere(new Vector3(-20, 20, 30), 10, new EmissiveMaterial(new Color(1, 1, 1), 35)));
-        scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 125f));
+        scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 125f, dayStrength: .3f));
 
         Camera cam1 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
         Camera cam2 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
@@ -51,7 +52,7 @@ class Program
         
         var stopwatch = Stopwatch.StartNew();
 
-        int samples = 40;
+        int samples = 10;
         scene.RenderCamera(0, 1, samples, 16);
         stopwatch.Stop();
         Logger.Warn($"Render took {stopwatch.Elapsed}");
@@ -62,7 +63,7 @@ class Program
         Logger.Warn($"Render took {stopwatch.Elapsed}");
 
         stopwatch = Stopwatch.StartNew();
-        scene.RenderCamera(2, 10, samples, 16);
+        scene.RenderCamera(2, 5, samples, 16);
         stopwatch.Stop();
         Logger.Warn($"Render took {stopwatch.Elapsed}");
 
