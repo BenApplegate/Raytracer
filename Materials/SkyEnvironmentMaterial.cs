@@ -7,24 +7,44 @@ namespace Raytracer.Materials;
 
 public class SkyEnvironmentMaterial : Material
 {
+    
+    Color nightColor = new Color(0.1f, .1f, .1f);
+    float nightStrength = .1f;
+
+    Color highDayColor = new Color(.01f, 85f / 255, 1);
+    Color lowDayColor = new Color(.05f, 110f / 255, 1);
+    float dayStrength = .25f;
+
+    Color sunColor = new Color(1, 1, 1);
+    Vector3 sunDirection = new Vector3(-1.2f, .7f, 1f);
+    
+    float sunStrength = 100;
+    float sunSize = .02f;
+
+    public SkyEnvironmentMaterial(Color? nightColor = null, float? nightStrength = null,
+        Color? highDayColor = null, Color? lowDayColor = null, float? dayStrength = null, Color? sunColor = null,
+        Vector3? sunDirection = null, float? sunStrength = null, float? sunSize = null)
+    {
+        if (nightColor is not null) this.nightColor = nightColor;
+        if (nightStrength is not null) this.nightStrength = nightStrength.Value;
+        if (highDayColor is not null) this.highDayColor = highDayColor;
+        if (lowDayColor is not null) this.lowDayColor = lowDayColor;
+        if (dayStrength is not null) this.dayStrength = dayStrength.Value;
+        if (sunColor is not null) this.sunColor = sunColor;
+        if (sunDirection is not null) this.sunDirection = sunDirection.Value;
+        if (sunStrength is not null) this.sunStrength = sunStrength.Value;
+        if (sunSize is not null) this.sunSize = sunSize.Value;
+        
+        this.sunDirection /= this.sunDirection.Length();
+    }
+    
     public void ProcessLighting(ref Ray ray, ref RayHit hit)
     {
-        Color nightColor = new Color(0, 0, .1f);
-        float nightStrength = 0;
-
-        Color highDayColor = new Color(.01f, 85f / 255, 1);
-        Color lowDayColor = new Color(.05f, 110f / 255, 1);
-        float dayStrength = .25f;
-
-        Color sunColor = new Color(1, 1, 1);
-        Vector3 sunDirection = new Vector3(-.2f, .7f, 1f);
-        sunDirection = sunDirection / sunDirection.Length();
-        float sunStrength = 100;
-        float sunSize = .02f;
+        
 
         float t = Vector3.Dot(ray.direction, new Vector3(0, 1, 0));
         
-        if (t < 0)
+        if (t < -.1)
         {
             if (ray.bounces == 0)
             {

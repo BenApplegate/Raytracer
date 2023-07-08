@@ -43,7 +43,7 @@ class Program
 
         var stopwatch = Stopwatch.StartNew();
 
-        int samples = 10;
+        int samples = 2;
         scene.RenderCamera(0, 1, samples, 16);
         stopwatch.Stop();
         Logger.Warn($"Render took {stopwatch.Elapsed}");
