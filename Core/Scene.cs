@@ -1,5 +1,6 @@
 ﻿using Raytracer.Interfaces;
 using Raytracer.Structs;
+using ThreadState = Raytracer.Structs.ThreadState;
 
 namespace Raytracer.Core;
 
@@ -29,15 +30,15 @@ public class Scene
         _renderables.Add(obj);
     }
 
-    public void RenderAllCameras(int maxLightBounces, int sampleCount = 100)
+    public void RenderAllCameras(int maxLightBounces, int sampleCount = 100, int threadCount = 1)
     {
         for (int i = 0; i < _cameras.Count; i++)
         {
-            RenderCamera(i, maxLightBounces, sampleCount);
+            RenderCamera(i, maxLightBounces, sampleCount, threadCount);
         }
     }
-    
-    public void RenderCamera(int camIndex, int maxLightBounces, int sampleCount = 100)
+
+    public void RenderCamera(int camIndex, int maxLightBounces, int sampleCount = 100, int threadCount = 1)
     {
         if (sampleCount < 1)
         {
@@ -56,93 +57,116 @@ public class Scene
             Logger.Warn("Selected camera is outside of range. Cannot render");
             return;
         }
+
+        //Create list to store all tasks
+        List<Task> tasks = new List<Task>();
         
         //Iterate over every ray from the camera and run raytracing algorithm
         var rays = _cameras[camIndex].GetCameraRays();
-        int hitCount = 0;
         for(int i = 0; i < rays.Count; i++)
         {
-
-
+            int rayIndex = i;
             if ((i + 1) % 10000 == 0)
             {
                 Logger.Info($"Now running ray {i+1}/{rays.Count}");
             }
 
-            List<Ray> samples = new List<Ray>();
-            for (int sample = 0; sample < sampleCount; sample++)
+            if (tasks.Count >= threadCount)
             {
-                //repeat tracing for every allowed light bounce
-                for (int bounce = 0; bounce <= maxLightBounces; bounce++)
+                //Wait for existing tasks to finish
+                foreach (Task t in tasks)
                 {
-                    List<RayHit> hits = new List<RayHit>();
-                    
-                    //Add this new ray to our samples
-                    samples.Add(rays[i]);
-                    Ray ray = samples[sample];
+                    t.Wait();
+                }
+                
+                //Clear now old tasks from list
+                tasks.Clear();
+            }
             
-                    //Call render object for each renderable object
-                    foreach (Renderable obj in _renderables)
+            //Add each ray to thread pool
+            var task = Task.Run(() =>
+            {
+                List<Ray> samples = new List<Ray>();
+                for (int sample = 0; sample < sampleCount; sample++)
+                {
+                    //repeat tracing for every allowed light bounce
+                    for (int bounce = 0; bounce <= maxLightBounces; bounce++)
                     {
-                        hits.Add(obj.Render(ref ray));
-                    }
+                        List<RayHit> hits = new List<RayHit>();
 
-                    //Find the closest found hit to get correct location
-                    bool hitSomething = false;
-                    RayHit closestHit = new RayHit();
-                    float closestDistance = float.PositiveInfinity;
-                    foreach (var hit in hits)
-                    {
-                        if (hit.didHit)
+                        //Add this new ray to our samples
+                        samples.Add(rays[rayIndex]);
+                        Ray ray = samples[sample];
+
+                        //Call render object for each renderable object
+                        foreach (Renderable obj in _renderables)
                         {
-                            hitCount++;
-                            hitSomething = true;
-                            if (hit.distance < closestDistance)
+                            hits.Add(obj.Render(ref ray));
+                        }
+
+                        //Find the closest found hit to get correct location
+                        bool hitSomething = false;
+                        RayHit closestHit = new RayHit();
+                        float closestDistance = float.PositiveInfinity;
+                        foreach (var hit in hits)
+                        {
+                            if (hit.didHit)
                             {
-                                closestDistance = hit.distance;
-                                closestHit = hit;
+                                hitSomething = true;
+                                if (hit.distance < closestDistance)
+                                {
+                                    closestDistance = hit.distance;
+                                    closestHit = hit;
+                                }
                             }
                         }
-                    }
-            
-                    if (hitSomething)
-                    {
-                        //Process lighting info for hit
-                        closestHit.material?.ProcessLighting(ref ray, ref closestHit);
-                
-                        closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
-                    }
 
-                    //Update bounce count
-                    if (closestHit.rayShouldContinue)
-                    {
-                        ray.bounces++;
+                        if (hitSomething)
+                        {
+                            //Process lighting info for hit
+                            closestHit.material?.ProcessLighting(ref ray, ref closestHit);
+
+                            closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
+                        }
+
+                        //Update bounce count
+                        if (closestHit.rayShouldContinue)
+                        {
+                            ray.bounces++;
+                        }
+
+                        //Save ray info back into this sample
+                        samples[sample] = ray;
                     }
-            
-                    //Save ray info back into this sample
-                    samples[sample] = ray;
                 }
-            }
-            
-            //We now need to average all of our samples together to get the final pixel color
-            Color finalColor = new Color(0, 0, 0);
-            foreach (Ray sample in samples)
-            {
-                finalColor += sample.gatheredColor;
-            }
 
-            finalColor /= (float)samples.Count;
+                //We now need to average all of our samples together to get the final pixel color
+                Color finalColor = new Color(0, 0, 0);
+                foreach (Ray sample in samples)
+                {
+                    finalColor += sample.gatheredColor;
+                }
 
-            Ray finalRay = samples[0];
-            finalRay.gatheredColor = finalColor;
-            
-            
-            //Save our finalized ray back to the image's rays;
-            rays[i] = finalRay;
+                finalColor /= (float)samples.Count;
 
+                Ray finalRay = samples[0];
+                finalRay.gatheredColor = finalColor;
+
+
+                //Save our finalized ray back to the image's rays;
+                rays[rayIndex] = finalRay;
+            });
+
+            tasks.Add(task);
+            //TraceRay(maxLightBounces, sampleCount, ref rays, i);
+        }
+        //Wait for all tasks to finish
+        foreach (Task t in tasks)
+        {
+            t.Wait();
         }
         
-        Logger.Info($"Found {hitCount} hits");
+        Logger.Info($"Finished Rendering Camera");
         //Send rays back to camera to save
         _cameras[camIndex].HandleProcessedRays(rays);
     }

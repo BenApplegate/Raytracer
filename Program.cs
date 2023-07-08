@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using Raytracer;
 using Raytracer.Core;
 using Raytracer.Materials;
@@ -23,10 +24,16 @@ class Program
         scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 80, 1920, 1080));
         
         scene.AddRenderable(new Sphere(new Vector3(0, -101, 0), 100, new DiffuseMaterial(new Color(0, .2f, 1))));
-        scene.AddRenderable(new Sphere(new Vector3(-2, 2, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 20)));
-        scene.AddRenderable(new Sphere(new Vector3(2, 2, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 10)));
+        scene.AddRenderable(new Sphere(new Vector3(-2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 40)));
+        scene.AddRenderable(new Sphere(new Vector3(2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 20)));
+
+        var stopwatch = Stopwatch.StartNew();
         
-        scene.RenderAllCameras(1, 100);
+        scene.RenderAllCameras(1, 500, 12);
+        
+        stopwatch.Stop();
+        
+        Logger.Warn($"Render took {stopwatch.Elapsed}");
         
         scene.SaveAllCameras();
     }
