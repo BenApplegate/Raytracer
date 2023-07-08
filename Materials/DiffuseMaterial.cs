@@ -16,7 +16,7 @@ public class DiffuseMaterial : Material
 
     public void ProcessLighting(ref Ray ray, ref RayHit hit)
     {
-        ray.color *= _albedo;
+        ray.color *= _albedo * Vector3.Dot(hit.hitNormal, ray.direction) * -1;
     }
 
     public void UpdateNextRay(ref Ray ray, ref RayHit hit)
