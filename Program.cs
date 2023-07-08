@@ -30,20 +30,20 @@ class Program
         // scene.AddRenderable(new Sphere(new Vector3(2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 20)));
 
         //TEST COMPLEX DIFFUSE
-        scene.AddRenderable(new Sphere(new Vector3(0, -25, 0), 23, new DiffuseMaterial(new Color(1, 1, 1))));
-        scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1.5f, new DiffuseMaterial(new Color(1, 0, 0))));
-        scene.AddRenderable(new Sphere(new Vector3(3, -0.5f, 1), 1, new DiffuseMaterial(new Color(0, 0, 1))));
-        scene.AddRenderable(new Sphere(new Vector3(-4, -1, -.5f), .75f, new DiffuseMaterial(new Color(0, 1, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(0, -20, 0), 23, new DiffuseMaterial(new Color(1, 1, 1))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 5, 0), 1.5f, new DiffuseMaterial(new Color(1, 0, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(3, 4.5f, 1), 1, new DiffuseMaterial(new Color(0, 0, 1))));
+        scene.AddRenderable(new Sphere(new Vector3(-4, 4, -.5f), .75f, new DiffuseMaterial(new Color(0, 1, 0))));
         //scene.AddRenderable(new Sphere(new Vector3(-20, 20, 30), 10, new EmissiveMaterial(new Color(1, 1, 1), 35)));
         scene.SetEnvironment(new SkyEnvironmentMaterial());
         
-        scene.AddCamera(new Camera(new Vector3(-1, 2, -10), new Vector3(20, 0, 0), 80, 1920, 1080));
-        scene.AddCamera(new Camera(new Vector3(-1, 2, -10), new Vector3(20, 0, 0), 80, 1920, 1080));
-        scene.AddCamera(new Camera(new Vector3(-1, 2, -10), new Vector3(20, 0, 0), 80, 1920, 1080));
+        scene.AddCamera(new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080));
+        scene.AddCamera(new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080));
+        scene.AddCamera(new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080));
 
         var stopwatch = Stopwatch.StartNew();
 
-        int samples = 100;
+        int samples = 10;
         scene.RenderCamera(0, 1, samples, 16);
         stopwatch.Stop();
         Logger.Warn($"Render took {stopwatch.Elapsed}");

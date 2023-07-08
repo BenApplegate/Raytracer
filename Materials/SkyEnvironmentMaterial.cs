@@ -19,7 +19,7 @@ public class SkyEnvironmentMaterial : Material
         Color sunColor = new Color(1, 1, 1);
         Vector3 sunDirection = new Vector3(-.2f, .7f, 1f);
         sunDirection = sunDirection / sunDirection.Length();
-        float sunStrength = 60;
+        float sunStrength = 100;
         float sunSize = .02f;
 
         float t = Vector3.Dot(ray.direction, new Vector3(0, 1, 0));
