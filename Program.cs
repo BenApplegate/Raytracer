@@ -15,7 +15,7 @@ class Program
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 50;
+        int samples = 600;
         
         //UnlitTestScene(scene, samples);
 
@@ -30,13 +30,15 @@ class Program
 
     private static void PlaneTestScene(Scene scene, int samples)
     {
-        scene.AddCamera(new Camera(new Vector3(0, 0, -5), new Vector3(0, 0, 0), 80, 1280, 720));
+        Camera cam = new Camera(new Vector3(0, 0, -5), new Vector3(0, 0, 0), 80, 1280, 720);
+        scene.AddCamera(cam);
+        cam.AddStartingImage("BasicScene_cam0.png");
         scene.SetEnvironment(new SkyEnvironmentMaterial());
         
         scene.AddRenderable(new Plane(new Vector3(-.5f, 1, 0), new Vector3(0, -1.5f, 0), new DiffuseMaterial(new Color(1f, 1f, 1f))));
         scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1, new DiffuseMaterial(new Color(1, .3f, 1))));
         
-        scene.RenderAllCameras(2, samples, 12);
+        scene.RenderAllCameras(4, samples, 12);
     }
     
     private static void BasicDiffuseScene(Scene scene, int samples)
