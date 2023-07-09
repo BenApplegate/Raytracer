@@ -35,6 +35,33 @@ public class Scene
         _renderables.Add(obj);
     }
 
+    public void RenderAllCamerasProgressive(int maxLightBounces, int sampleCount = 1, int threadCount = 1, string filename = "")
+    {
+        //Create a task that runs in new thread just waiting for input
+        Task inputTask = Task.Run(() =>
+        {
+            Console.ReadKey(true);
+        });
+        
+        //Run on a loop until the task has completed (User presses input
+        while (!inputTask.IsCompleted)
+        {
+            Logger.Important("Starting next progressive samples");
+            for(int i = 0; i < _cameras.Count; i++)
+            {
+                //Set saved image for camera to render along side
+                _cameras[i].AddStartingImage(filename+$"{_name}_cam{i}.png");
+            }
+            
+            RenderAllCameras(maxLightBounces, sampleCount, threadCount);
+            
+            Logger.Important("Progressive samples finished rendering, saving files");
+            
+            SaveAllCameras(sampleCount, filename);
+            
+        }
+    }
+    
     public void RenderAllCameras(int maxLightBounces, int sampleCount = 100, int threadCount = 1)
     {
         for (int i = 0; i < _cameras.Count; i++)

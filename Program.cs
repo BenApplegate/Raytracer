@@ -13,16 +13,17 @@ class Program
     {
 
         Logger.Info("Raytracer Initializing");
+        Logger.SuppressInfo(true);
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 1000;
+        int samples = 1;
         
         // UnlitTestScene(scene, samples);
 
         // BasicDiffuseScene(scene, samples);
 
-        ComplexDiffuseScene(scene, samples);
+        ComplexDiffuseSceneProgressive(scene, samples);
 
         //PlaneTestScene(scene, samples);
 
@@ -30,7 +31,7 @@ class Program
 
         //ProjectionTestScene(scene, samples);
 
-        scene.SaveAllCameras(samples);
+        //scene.SaveAllCameras(samples);
     }
 
     private static void ProjectionTestScene(Scene scene, int samples)
@@ -103,7 +104,7 @@ class Program
         scene.RenderAllCameras(1, samples, 16);
     }
 
-    private static void ComplexDiffuseScene(Scene scene, int samples)
+    private static void ComplexDiffuseSceneProgressive(Scene scene, int samples)
     {
         //TEST COMPLEX DIFFUSE
         scene.AddRenderable(new Sphere(new Vector3(0, -20, 0), 23, new DiffuseMaterial(new Color(1, 1, 1))));
@@ -113,33 +114,36 @@ class Program
         //scene.AddRenderable(new Sphere(new Vector3(-20, 20, 30), 10, new EmissiveMaterial(new Color(1, 1, 1), 35)));
         scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 125f, dayStrength: .3f));
 
-        Camera cam1 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
-        Camera cam2 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
+        // Camera cam1 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
+        // Camera cam2 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
         Camera cam3 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
 
-        scene.AddCamera(cam1);
-        scene.AddCamera(cam2);
+        // scene.AddCamera(cam1);
+        // scene.AddCamera(cam2);
         scene.AddCamera(cam3);
 
-        cam1.AddStartingImage("BasicScene_cam0.png");
-        cam2.AddStartingImage("BasicScene_cam1.png");
-        cam3.AddStartingImage("BasicScene_cam2.png");
-
-        var stopwatch = Stopwatch.StartNew();
+        // cam1.AddStartingImage("BasicScene_cam0.png");
+        // cam2.AddStartingImage("BasicScene_cam1.png");
+        // cam3.AddStartingImage("BasicScene_cam2.png");
+        //
+        // var stopwatch = Stopwatch.StartNew();
+        //
+        // scene.RenderCamera(0, 1, samples, 16);
+        // stopwatch.Stop();
+        // Logger.Warn($"Render took {stopwatch.Elapsed}");
+        //
+        // stopwatch = Stopwatch.StartNew();
+        // scene.RenderCamera(1, 2, samples, 16);
+        // stopwatch.Stop();
+        // Logger.Warn($"Render took {stopwatch.Elapsed}");
+        //
+        // stopwatch = Stopwatch.StartNew();
+        // scene.RenderCamera(2, 3, samples, 16);
+        // stopwatch.Stop();
+        // Logger.Warn($"Render took {stopwatch.Elapsed}");
         
-        scene.RenderCamera(0, 1, samples, 16);
-        stopwatch.Stop();
-        Logger.Warn($"Render took {stopwatch.Elapsed}");
+        scene.RenderAllCamerasProgressive(5, samples, 12, "");
         
-        stopwatch = Stopwatch.StartNew();
-        scene.RenderCamera(1, 2, samples, 16);
-        stopwatch.Stop();
-        Logger.Warn($"Render took {stopwatch.Elapsed}");
-
-        stopwatch = Stopwatch.StartNew();
-        scene.RenderCamera(2, 3, samples, 16);
-        stopwatch.Stop();
-        Logger.Warn($"Render took {stopwatch.Elapsed}");
     }
 
     public static void SetupCameraRing(float radius, int count, ref Scene scene)

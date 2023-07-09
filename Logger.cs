@@ -4,8 +4,16 @@ namespace Raytracer;
 
 public static class Logger
 {
+    private static bool _suppressInfo = false;
+
+    public static void SuppressInfo(bool suppress)
+    {
+        _suppressInfo = suppress;
+    }
+    
     public static void Info(string message)
     {
+        if(_suppressInfo) return;
         var method = new StackTrace().GetFrame(1)?.GetMethod();
         if (method is not null)
         {
@@ -29,6 +37,23 @@ public static class Logger
         else
         {
             Console.WriteLine($"WARN {{UnknownClass:UnknownMethod}} {{{DateTime.Now}}}: {message}");
+        }
+
+        Console.ForegroundColor = oldColor;
+    }
+    
+    public static void Important(string message)
+    {
+        var oldColor = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Green;
+        var method = new StackTrace().GetFrame(1)?.GetMethod();
+        if (method is not null)
+        {
+            Console.WriteLine($"IMPORTANT {{{method.ReflectedType?.Name}:{method.Name}}} {{{DateTime.Now}}}: {message}");
+        }
+        else
+        {
+            Console.WriteLine($"IMPORTANT {{UnknownClass:UnknownMethod}} {{{DateTime.Now}}}: {message}");
         }
 
         Console.ForegroundColor = oldColor;
