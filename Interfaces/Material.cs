@@ -8,4 +8,8 @@ public interface Material
     public void ProcessLighting(ref Ray ray, ref RayHit hit);
 
     public void UpdateNextRay(ref Ray ray, ref RayHit hit);
+
+    public void ProcessAlbedo(ref Ray ray, ref RayHit hit);
+
+    public void ProcessNormal(ref Ray ray, ref RayHit hit);
 }

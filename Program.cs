@@ -17,7 +17,7 @@ class Program
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 1;
+        int samples = 2;
         
         // UnlitTestScene(scene, samples);
 
@@ -112,37 +112,15 @@ class Program
         scene.AddRenderable(new Sphere(new Vector3(3, 4.5f, 1), 1, new DiffuseMaterial(new Color(.1f, .1f, 1))));
         scene.AddRenderable(new Sphere(new Vector3(-4, 4, -.5f), .75f, new DiffuseMaterial(new Color(.1f, 1, .1f))));
         //scene.AddRenderable(new Sphere(new Vector3(-20, 20, 30), 10, new EmissiveMaterial(new Color(1, 1, 1), 35)));
-        scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 125f, dayStrength: .3f));
+        scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 30f, dayStrength: .025f, nightStrength: 0));
 
         // Camera cam1 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
         // Camera cam2 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
         Camera cam3 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
 
-        // scene.AddCamera(cam1);
-        // scene.AddCamera(cam2);
         scene.AddCamera(cam3);
 
-        // cam1.AddStartingImage("BasicScene_cam0.png");
-        // cam2.AddStartingImage("BasicScene_cam1.png");
-        // cam3.AddStartingImage("BasicScene_cam2.png");
-        //
-        // var stopwatch = Stopwatch.StartNew();
-        //
-        // scene.RenderCamera(0, 1, samples, 16);
-        // stopwatch.Stop();
-        // Logger.Warn($"Render took {stopwatch.Elapsed}");
-        //
-        // stopwatch = Stopwatch.StartNew();
-        // scene.RenderCamera(1, 2, samples, 16);
-        // stopwatch.Stop();
-        // Logger.Warn($"Render took {stopwatch.Elapsed}");
-        //
-        // stopwatch = Stopwatch.StartNew();
-        // scene.RenderCamera(2, 3, samples, 16);
-        // stopwatch.Stop();
-        // Logger.Warn($"Render took {stopwatch.Elapsed}");
-        
-        scene.RenderAllCamerasProgressive(5, samples, 12, "");
+        scene.RenderAllCamerasProgressive(5, samples, 12, "", 5);
         
     }
 

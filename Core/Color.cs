@@ -37,4 +37,11 @@ public class Color
     {
         return new Color(a.r / b, a.g / b, a.b / b);
     }
+
+    public Color Normalize()
+    {
+        float magnitude = r * r + b * b + g * g;
+        magnitude = MathF.Sqrt(magnitude);
+        return this / magnitude;
+    }
 }

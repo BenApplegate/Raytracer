@@ -23,4 +23,14 @@ public class AmbientEnvironmentMaterial : Material
     {
         hit.rayShouldContinue = false;
     }
+
+    public void ProcessAlbedo(ref Ray ray, ref RayHit hit)
+    {
+        ray.gatheredColor = _color.Normalize();
+    }
+
+    public void ProcessNormal(ref Ray ray, ref RayHit hit)
+    {
+        ray.gatheredColor = new Color(0, 0, 0);
+    }
 }

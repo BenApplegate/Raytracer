@@ -48,7 +48,7 @@ public class SkyEnvironmentMaterial : Material
         {
             if (ray.bounces == 0)
             {
-                ray.gatheredColor += nightColor;
+                ray.gatheredColor = nightColor;
                 return;
             }
             ray.gatheredColor += ray.color * nightColor * nightStrength;
@@ -58,6 +58,11 @@ public class SkyEnvironmentMaterial : Material
         float sunMatch = Vector3.Dot(ray.direction, sunDirection);
         if (1 - sunMatch < sunSize)
         {
+            if (ray.bounces == 0)
+            {
+                ray.gatheredColor = sunColor;
+                return;
+            }
             ray.gatheredColor += ray.color * sunColor * sunStrength;
             return;
         }
@@ -67,7 +72,7 @@ public class SkyEnvironmentMaterial : Material
         if (ray.bounces == 0)
         {
             //This ray directly hit the sky and should show the full color
-            ray.gatheredColor += skyColor;
+            ray.gatheredColor = skyColor;
             return;
         }
         
@@ -78,5 +83,39 @@ public class SkyEnvironmentMaterial : Material
     public void UpdateNextRay(ref Ray ray, ref RayHit hit)
     {
         hit.rayShouldContinue = false;
+    }
+
+    public void ProcessAlbedo(ref Ray ray, ref RayHit hit)
+    {
+        float t = Vector3.Dot(ray.direction, new Vector3(0, 1, 0));
+        
+        if (t < 0)
+        {
+            ray.gatheredColor = nightColor;
+            return;
+        }
+
+        float sunMatch = Vector3.Dot(ray.direction, sunDirection);
+        if (1 - sunMatch < sunSize)
+        {
+            ray.gatheredColor = sunColor;
+            return;
+        }
+
+        Color skyColor = (lowDayColor * t) + (highDayColor * (1 - t));
+        
+        if (ray.bounces == 0)
+        {
+            //This ray directly hit the sky and should show the full color
+            ray.gatheredColor = skyColor;
+            return;
+        }
+
+        ray.gatheredColor += skyColor;
+    }
+
+    public void ProcessNormal(ref Ray ray, ref RayHit hit)
+    {
+        ray.gatheredColor = new Color(0, 0, 0);
     }
 }

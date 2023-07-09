@@ -1,4 +1,5 @@
-﻿using Raytracer.Interfaces;
+﻿using System.Diagnostics;
+using Raytracer.Interfaces;
 using Raytracer.Structs;
 
 namespace Raytracer.Core;
@@ -35,18 +36,30 @@ public class Scene
         _renderables.Add(obj);
     }
 
-    public void RenderAllCamerasProgressive(int maxLightBounces, int sampleCount = 1, int threadCount = 1, string filename = "")
+    public void RenderAllCamerasProgressive(int maxLightBounces, int sampleCount = 1, int threadCount = 1, string filename = "", int denoiseEvery = 10)
     {
         //Create a task that runs in new thread just waiting for input
         Task inputTask = Task.Run(() =>
         {
             Console.ReadKey(true);
+            Logger.Important("Stopping Render");
         });
+
+        int count = 0;
         
+        Logger.Important("Generating Albedo Pass");
+        RenderAllCameras(0, 1, 12, 1);
+        SaveAllCameras(1, "ALBEDO_");
+        
+        Logger.Important("Generating Normal Pass");
+        RenderAllCameras(0, 1, 12, 2);
+        SaveAllCameras(1, "NORMAL_");
+
         //Run on a loop until the task has completed (User presses input
         while (!inputTask.IsCompleted)
         {
-            Logger.Important("Starting next progressive samples");
+            count++;
+            Logger.Important($"Starting next progressive samples\t{denoiseEvery-count} until denoise pass");
             for(int i = 0; i < _cameras.Count; i++)
             {
                 //Set saved image for camera to render along side
@@ -58,19 +71,34 @@ public class Scene
             Logger.Important("Progressive samples finished rendering, saving files");
             
             SaveAllCameras(sampleCount, filename);
+
+            if (count == denoiseEvery && denoiseEvery >= 1)
+            {
+                Logger.Important("Running Denoiser");
+
+                for (int i = 0; i < _cameras.Count; i++)
+                {
+                    var proc = Process.Start("Denoiser", $"-i \"{filename + $"{_name}_cam{i}.png"}\" -o \"{filename + $"DN_{_name}_cam{i}.png"}\"" +
+                                                         $" -a \"{filename + $"ALBEDO_{_name}_cam{i}.png"}\" -n \"{filename + $"NORMAL_{_name}_cam{i}.png"}\" -clean_aux 1 -hdr 0");
+                    proc.WaitForExit();
+                }
+
+                count = 0;
+            }
             
         }
     }
     
-    public void RenderAllCameras(int maxLightBounces, int sampleCount = 100, int threadCount = 1)
+    public void RenderAllCameras(int maxLightBounces, int sampleCount = 100, int threadCount = 1, int renderPass=0)
     {
         for (int i = 0; i < _cameras.Count; i++)
         {
-            RenderCamera(i, maxLightBounces, sampleCount, threadCount);
+            RenderCamera(i, maxLightBounces, sampleCount, threadCount, renderPass);
         }
     }
 
-    public void RenderCamera(int camIndex, int maxLightBounces, int sampleCount = 100, int threadCount = 1)
+    public void RenderCamera(int camIndex, int maxLightBounces, int sampleCount = 100, int threadCount = 1,
+        int renderPass = 0)
     {
         if (sampleCount < 1)
         {
@@ -116,7 +144,7 @@ public class Scene
             }
             
             //Add each ray to thread pool
-            var task = Task.Run(() => TraceRay(maxLightBounces, sampleCount, rays, rayIndex));
+            var task = Task.Run(() => TraceRay(maxLightBounces, sampleCount, rays, rayIndex, renderPass));
 
             tasks.Add(task);
             //TraceRay(maxLightBounces, sampleCount, ref rays, i);
@@ -132,19 +160,20 @@ public class Scene
         _cameras[camIndex].HandleProcessedRays(rays, sampleCount);
     }
 
-    private void TraceRay(int maxLightBounces, int sampleCount, List<Ray> rays, int rayIndex)
+    private void TraceRay(int maxLightBounces, int sampleCount, List<Ray> rays, int rayIndex, int pass = 0)
     {
         List<Ray> samples = new List<Ray>();
         for (int sample = 0; sample < sampleCount; sample++)
         {
+            
+            //Add this new ray to our samples
+            samples.Add(rays[rayIndex]);
+            Ray ray = samples[sample];
+            
             //repeat tracing for every allowed light bounce
             for (int bounce = 0; bounce <= maxLightBounces; bounce++)
             {
                 List<RayHit> hits = new List<RayHit>();
-
-                //Add this new ray to our samples
-                samples.Add(rays[rayIndex]);
-                Ray ray = samples[sample];
 
                 //Call render object for each renderable object
                 foreach (Renderable obj in _renderables)
@@ -171,18 +200,45 @@ public class Scene
 
                 if (hitSomething)
                 {
-                    //Process lighting info for hit
-                    closestHit.material?.ProcessLighting(ref ray, ref closestHit);
+                    if (pass == 0)
+                    {
+                        //Process lighting info for hit
+                        closestHit.material?.ProcessLighting(ref ray, ref closestHit);
 
-                    closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
+                        closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
+                    }
+                    else if (pass == 1)
+                    {
+                        //handle albedo pass
+                        closestHit.material?.ProcessAlbedo(ref ray, ref closestHit);
+                        closestHit.rayShouldContinue = false;
+                    }
+                    else if (pass == 2)
+                    {
+                        closestHit.material?.ProcessNormal(ref ray, ref closestHit);
+                        closestHit.rayShouldContinue = false;
+                    }
                 }
                 else
                 {
                     //Handle environment light
                     if (_environment is not null)
                     {
-                        _environment.ProcessLighting(ref ray, ref closestHit);
-                        _environment.UpdateNextRay(ref ray, ref closestHit);
+                        if (pass == 0)
+                        {
+                            _environment.ProcessLighting(ref ray, ref closestHit);
+                            _environment.UpdateNextRay(ref ray, ref closestHit);
+                        }
+                        else if (pass == 1)
+                        {
+                            _environment.ProcessAlbedo(ref ray, ref closestHit);
+                            closestHit.rayShouldContinue = false;
+                        }
+                        else if (pass == 2)
+                        {
+                            _environment.ProcessNormal(ref ray, ref closestHit);
+                            closestHit.rayShouldContinue = false;
+                        }
                     }
                     else
                     {
@@ -208,7 +264,7 @@ public class Scene
         {
             finalColor += sample.gatheredColor;
         }
-
+        
         finalColor /= (float)samples.Count;
 
         Ray finalRay = samples[0];

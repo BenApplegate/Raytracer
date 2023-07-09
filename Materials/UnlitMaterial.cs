@@ -25,4 +25,17 @@ public class UnlitMaterial : Material
     {
         hit.rayShouldContinue = false;
     }
+
+    public void ProcessAlbedo(ref Ray ray, ref RayHit hit)
+    {
+        ray.gatheredColor = _color;
+    }
+
+    public void ProcessNormal(ref Ray ray, ref RayHit hit)
+    {
+        float r = hit.hitNormal.X * .5f + .5f;
+        float g = hit.hitNormal.Y * .5f + .5f;
+        float b = hit.hitNormal.Z * .5f + .5f;
+        ray.gatheredColor = new Color(r, g, b);
+    }
 }
