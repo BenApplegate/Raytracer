@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Raytracer;
 using Raytracer.Core;
 using Raytracer.Materials;
@@ -15,17 +16,53 @@ class Program
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 600;
+        int samples = 1000;
         
-        //UnlitTestScene(scene, samples);
+        // UnlitTestScene(scene, samples);
 
-        //BasicDiffuseScene(scene, samples);
+        // BasicDiffuseScene(scene, samples);
 
-        //ComplexDiffuseScene(scene, samples);
+        ComplexDiffuseScene(scene, samples);
 
-        PlaneTestScene(scene, samples);
+        //PlaneTestScene(scene, samples);
+
+        // PlaneBackfaceScene(scene, samples);
+
+        //ProjectionTestScene(scene, samples);
 
         scene.SaveAllCameras(samples);
+    }
+
+    private static void ProjectionTestScene(Scene scene, int samples)
+    {
+        scene.AddCamera(new Camera(new Vector3(0, 0, -15), Vector3.Zero, 90, 1280, 720));
+        scene.AddCamera(new Camera(new Vector3(0, 15, 0), new Vector3(90, 0, 0), 90, 1280, 720));
+        
+        scene.AddRenderable(new Sphere(new Vector3(5, 0, 5), 1, new DiffuseMaterial(new Color(1, 0, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(-5, 0, 5), 1, new DiffuseMaterial(new Color(1, 0, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(-5, 0, -5), 1, new DiffuseMaterial(new Color(1, 0, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(5, 0, -5), 1, new DiffuseMaterial(new Color(1, 0, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1, new DiffuseMaterial(new Color(1, 0, 0))));
+        scene.AddRenderable(new Plane(new Vector3(0, 1, 0), new Vector3(0, -1, 0),
+            new DiffuseMaterial(new Color(.8f, .8f, .8f))));
+        
+        scene.SetEnvironment(new AmbientEnvironmentMaterial(new Color(2, 2, 2)));
+        
+        scene.RenderAllCameras(1, samples, 12);
+    }
+
+    private static void PlaneBackfaceScene(Scene scene, int samples)
+    {
+        Camera cam = new Camera(new Vector3(0, 5, -5), new Vector3(45, 0, 0), 90, 1280, 720);
+        scene.AddCamera(cam);
+        cam.AddStartingImage("BasicScene_cam0.png");
+        
+        scene.AddRenderable(new Plane(new Vector3(0, 1, 0), Vector3.Zero, new DiffuseMaterial(new Color(1, 1, 1))));
+        scene.AddRenderable(new Plane(new Vector3(0, 0, 1), Vector3.Zero, new DiffuseMaterial(new Color(0, 0, 1))));
+        
+        scene.SetEnvironment(new AmbientEnvironmentMaterial(new Color(2, 2, 2)));
+        
+        scene.RenderAllCameras(10, samples, 12);
     }
 
     private static void PlaneTestScene(Scene scene, int samples)
@@ -90,14 +127,14 @@ class Program
 
         var stopwatch = Stopwatch.StartNew();
         
-        // scene.RenderCamera(0, 1, samples, 16);
-        // stopwatch.Stop();
-        // Logger.Warn($"Render took {stopwatch.Elapsed}");
-        //
-        // stopwatch = Stopwatch.StartNew();
-        // scene.RenderCamera(1, 2, samples, 16);
-        // stopwatch.Stop();
-        // Logger.Warn($"Render took {stopwatch.Elapsed}");
+        scene.RenderCamera(0, 1, samples, 16);
+        stopwatch.Stop();
+        Logger.Warn($"Render took {stopwatch.Elapsed}");
+        
+        stopwatch = Stopwatch.StartNew();
+        scene.RenderCamera(1, 2, samples, 16);
+        stopwatch.Stop();
+        Logger.Warn($"Render took {stopwatch.Elapsed}");
 
         stopwatch = Stopwatch.StartNew();
         scene.RenderCamera(2, 3, samples, 16);

@@ -109,22 +109,26 @@ public class Camera
             for (int x = 0; x < _canvasXResolution; x++)
             {
                 float degreesToRad = MathF.PI / 180f;
-                
-                float hOffset = Lerp(-1 * (_hFov) / 2, _hFov / 2, (float)x / (_canvasXResolution - 1));
-                float vOffset = Lerp(-1 * (_vFov / 2), _vFov / 2, (float)y / (_canvasYResolution - 1));
 
-                float zPos = MathF.Cos((vOffset + _rotation.X) * degreesToRad) *
-                             MathF.Cos((hOffset + _rotation.Y) * degreesToRad);
-                
-                float xPos = MathF.Cos((vOffset + _rotation.X) * degreesToRad) *
-                             MathF.Sin((hOffset + _rotation.Y) * degreesToRad);
+                float aspectRatio = (float)_canvasXResolution / _canvasYResolution;
 
-                float yPos = -MathF.Sin((vOffset + _rotation.X) * degreesToRad);
-                
+                float xPos = aspectRatio * (x - (_canvasXResolution/2f))/_canvasXResolution;
+                float yPos = (y - (_canvasYResolution/2f))/_canvasYResolution;
+                yPos *= -1;
+                float zPos = 1/MathF.Tan(_hFov * degreesToRad / 2);
+
+                Vector3 direction = new Vector3(xPos, yPos, zPos);
+                direction /= direction.Length();
+
+                Matrix4x4 rotation = Matrix4x4.CreateFromYawPitchRoll(_rotation.Y * degreesToRad,
+                    _rotation.X * degreesToRad, _rotation.Z * degreesToRad);
+
+                direction = Vector3.Transform(direction, rotation);
+
                 rays.Add(new Ray()
                 {
                     origin = _location,
-                    direction = new Vector3(xPos, yPos, zPos),
+                    direction = direction,
                     canvasX = x,
                     canvasY = y,
                     color = new Color(1, 1, 1),
