@@ -11,14 +11,14 @@ public class SkyEnvironmentMaterial : Material
     Color nightColor = new Color(0.3f, .3f, .3f);
     float nightStrength = .1f;
 
-    Color highDayColor = new Color(.01f, 85f / 255, 1);
+    Color highDayColor = new Color(90f/255, 193f / 255, 237f/255);
     Color lowDayColor = new Color(.05f, 110f / 255, 1);
     float dayStrength = .25f;
 
-    Color sunColor = new Color(1, 1, 1);
-    Vector3 sunDirection = new Vector3(-1.2f, .7f, 1f);
+    Color sunColor = new Color(1, 1, 0.95f);
+    Vector3 sunDirection = new Vector3(-1.5f, 1.6f, 1f);
     
-    float sunStrength = 100;
+    float sunStrength = 60;
     float sunSize = .02f;
 
     public SkyEnvironmentMaterial(Color? nightColor = null, float? nightStrength = null,

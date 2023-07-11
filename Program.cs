@@ -17,13 +17,13 @@ class Program
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 500;
+        int samples = 1;
         
         // UnlitTestScene(scene, samples);
 
         // BasicDiffuseScene(scene, samples);
 
-        ComplexDiffuseSceneProgressive(scene, samples);
+        //ComplexDiffuseSceneProgressive(scene, samples);
 
         //PlaneTestScene(scene, samples);
 
@@ -31,10 +31,21 @@ class Program
 
         //ProjectionTestScene(scene, samples);
 
-        //scene.SaveAllCameras(samples);
+        TriangleTestScene(scene, samples);
+        
+        scene.SaveAllCameras(samples);
         
         watch.Stop();
         Logger.Info($"Render took {watch.Elapsed}");
+    }
+
+    private static void TriangleTestScene(Scene scene, int samples)
+    {
+        scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 90, 1280, 720));
+        
+        scene.AddRenderable(new Triangle(new Vector3(-1, -1, 0), new Vector3(1, 0, 0), new Vector3(-1, 1, 0), new UnlitMaterial(new Color(1, 1, 1))));
+        
+        scene.RenderAllCameras(1, samples, 30);
     }
 
     private static void ProjectionTestScene(Scene scene, int samples)
@@ -110,22 +121,22 @@ class Program
     private static void ComplexDiffuseSceneProgressive(Scene scene, int samples)
     {
         //TEST COMPLEX DIFFUSE
-        scene.AddRenderable(new Plane(new Vector3(0, 1, 0), new Vector3(0, 3, 0), new DiffuseMaterial(new Color(1, 1, 1))));
-        scene.AddRenderable(new Sphere(new Vector3(0, 5, 0), 1.5f, new DiffuseMaterial(new Color(1, .1f, .1f))));
-        scene.AddRenderable(new Sphere(new Vector3(3, 4.5f, 1), 1, new DiffuseMaterial(new Color(.1f, .1f, 1))));
-        scene.AddRenderable(new Sphere(new Vector3(-4, 4, -.5f), .75f, new DiffuseMaterial(new Color(.1f, 1, .1f))));
+        scene.AddRenderable(new Plane(new Vector3(0, 1, 0), new Vector3(0, 0, 0), new DiffuseMaterial(new Color(.85f, .85f, .85f))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 1.5f, 0), 1.5f, new DiffuseMaterial(new Color(0, .95f, .95f))));
+        scene.AddRenderable(new Sphere(new Vector3(3, 1f, 1), 1, new DiffuseMaterial(new Color(.95f, 0, .95f))));
+        scene.AddRenderable(new Sphere(new Vector3(-4, .75f, -.5f), .75f, new DiffuseMaterial(new Color(.95f, .95f, 0))));
         //scene.AddRenderable(new Sphere(new Vector3(-20, 20, 30), 10, new EmissiveMaterial(new Color(1, 1, 1), 35)));
-        scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 100f, dayStrength: .075f, nightStrength: 0));
+        scene.SetEnvironment(new SkyEnvironmentMaterial());
         //scene.SetEnvironment(new AmbientEnvironmentMaterial(new Color(1, 1, 1)));
         
-        Camera cam3 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1280, 720);
+        Camera cam3 = new Camera(new Vector3(5, 3.5f, -10), new Vector3(10, -30, 0), 80, 1280, 720);
 
         scene.AddCamera(cam3);
 
-        scene.RenderAllCameras(5, samples, 32);
+        //scene.RenderAllCameras(5, samples, 32);
+        //scene.SaveAllCameras(samples);
         
-        scene.SaveAllCameras(samples);
-        //scene.RenderAllCamerasProgressive(5, samples, 32, "", 5);
+        scene.RenderAllCamerasProgressive(5, samples, 32, "", 5);
         
     }
 

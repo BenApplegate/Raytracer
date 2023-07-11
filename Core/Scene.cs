@@ -120,14 +120,7 @@ public class Scene
         }
 
         //Create list to store all tasks
-        Thread[] threads = new Thread[threadCount]; 
-        
-        //Fill threads list with threads
-        for (int i = 0; i < threadCount; i++)
-        {
-            threads[i] = new Thread(TraceRay);
-        }
-        
+        List<Task> tasks = new List<Task>();
         
         //Iterate over every ray from the camera and run raytracing algorithm
         var rays = _cameras[camIndex].GetCameraRays();
@@ -139,42 +132,28 @@ public class Scene
                 Logger.Info($"Now running ray {i+1}/{rays.Count}");
             }
 
-            //Find open thread
-            int openThread = -1;
-            
-            do
+            if (tasks.Count >= threadCount)
             {
-                for (int threadIndex = 0; threadIndex < threadCount; threadIndex++)
+                //Wait for existing tasks to finish
+                foreach (Task t in tasks)
                 {
-                    if (!threads[threadIndex].IsAlive)
-                    {
-                        threads[threadIndex] = new Thread(TraceRay);
-                        openThread = threadIndex;
-                        break;
-                    }
+                    t.Wait();
                 }
                 
-                //if(openThread == -1) Logger.Error("Failed to not find open thread");
-            } while (openThread == -1);
+                //Clear now old tasks from list
+                tasks.Clear();
+            }
+            
+            //Add each ray to thread pool
+            var task = Task.Run(() => TraceRay(maxLightBounces, sampleCount, rays, rayIndex, renderPass));
 
-            //Logger.Warn("Made it here");
-
-            //Start thread
-            threads[openThread].Start(new ThreadState()
-            {
-                maxLightBounces = maxLightBounces,
-                sampleCount = sampleCount,
-                rays = rays,
-                rayIndex = rayIndex,
-                pass = renderPass
-            });
-
+            tasks.Add(task);
             //TraceRay(maxLightBounces, sampleCount, ref rays, i);
         }
         //Wait for all tasks to finish
-        foreach (Thread t in threads)
+        foreach (Task t in tasks)
         {
-            t.Join();
+            t.Wait();
         }
         
         Logger.Info($"Finished Rendering Camera");
@@ -182,21 +161,8 @@ public class Scene
         _cameras[camIndex].HandleProcessedRays(rays, sampleCount);
     }
 
-    private void TraceRay(object? state)
+    private void TraceRay(int maxLightBounces, int sampleCount, List<Ray> rays, int rayIndex, int pass = 0)
     {
-
-        //int maxLightBounces, int sampleCount, List<Ray> rays, int rayIndex, int pass = 0
-        if (state is null || !(state is ThreadState))
-        {
-            Logger.Error("Thread provided with invalid state");
-        }
-
-        ThreadState threadState = (ThreadState)state!;
-        int maxLightBounces = threadState.maxLightBounces;
-        int sampleCount = threadState.sampleCount;
-        List<Ray> rays = threadState.rays;
-        int rayIndex = threadState.rayIndex;
-        int pass = threadState.pass;
 
         Utility._random = new Random(rayIndex + Utility._globalRandom.Next());
         

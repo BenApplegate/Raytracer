@@ -109,14 +109,18 @@ public class Camera
             for (int x = 0; x < _canvasXResolution; x++)
             {
                 float degreesToRad = MathF.PI / 180f;
-                float yawOffset = Lerp(-1 * (_hFov / 2), (_hFov / 2), (float)x / _canvasXResolution);
-                float pitchOffset = Lerp(-1 * (_vFov / 2), (_vFov / 2), (float)y / _canvasYResolution);
-                
+                float aspectRatio = (float)_canvasXResolution / _canvasYResolution;
 
-                Vector3 direction = new Vector3(0, 0, 1);
+                float xPos = aspectRatio * ((x + .5f) - (_canvasXResolution/2f))/_canvasXResolution;
+                float yPos = ((y + .5f) - (_canvasYResolution/2f))/_canvasYResolution;
+                yPos *= -1;
+                float zPos = 1/MathF.Tan(_hFov * degreesToRad / 2);
 
-                Matrix4x4 rotation = Matrix4x4.CreateFromYawPitchRoll((_rotation.Y + yawOffset) * degreesToRad,
-                    (_rotation.X + pitchOffset) * degreesToRad, _rotation.Z * degreesToRad);
+                Vector3 direction = new Vector3(xPos, yPos, zPos);
+                direction /= direction.Length();
+
+                Matrix4x4 rotation = Matrix4x4.CreateFromYawPitchRoll(_rotation.Y * degreesToRad,
+                    _rotation.X * degreesToRad, _rotation.Z * degreesToRad);
 
                 direction = Vector3.Transform(direction, rotation);
 
