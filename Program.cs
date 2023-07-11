@@ -13,11 +13,11 @@ class Program
     {
         var watch = Stopwatch.StartNew();
         Logger.Info("Raytracer Initializing");
-        //Logger.SuppressInfo(true);
+        
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 1;
+        int samples = 10;
         
         // UnlitTestScene(scene, samples);
 
@@ -33,7 +33,7 @@ class Program
 
         TriangleTestScene(scene, samples);
         
-        scene.SaveAllCameras(samples);
+        //scene.SaveAllCameras(samples);
         
         watch.Stop();
         Logger.Info($"Render took {watch.Elapsed}");
@@ -41,11 +41,18 @@ class Program
 
     private static void TriangleTestScene(Scene scene, int samples)
     {
-        scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 90, 1280, 720));
+        Logger.SuppressInfo(true);
+        float scale = 5;
         
-        scene.AddRenderable(new Triangle(new Vector3(-1, -1, 0), new Vector3(1, 0, 0), new Vector3(-1, 1, 0), new UnlitMaterial(new Color(1, 1, 1))));
+        scene.AddCamera(new Camera(new Vector3(0, 2, 10), new Vector3(0, 180, 0), 90, 1920, 1080));
         
-        scene.RenderAllCameras(1, samples, 30);
+        scene.AddRenderable(new Triangle(new Vector3(-scale, 0, -scale), new Vector3(scale, 0, -scale), new Vector3(-scale, 0, scale), new DiffuseMaterial(new Color(.95f, .95f, .95f))));
+        scene.AddRenderable(new Triangle(new Vector3(scale, 0, -scale), new Vector3(scale, 0, scale), new Vector3(-scale, 0, scale), new DiffuseMaterial(new Color(.95f, .95f, .95f))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 2f, 0), 2, new DiffuseMaterial(new Color(.05f, .05f, .85f))));
+        
+        scene.SetEnvironment(new SkyEnvironmentMaterial());
+        
+        scene.RenderAllCamerasProgressive(5, samples, 30, "", 5);
     }
 
     private static void ProjectionTestScene(Scene scene, int samples)
@@ -120,6 +127,7 @@ class Program
 
     private static void ComplexDiffuseSceneProgressive(Scene scene, int samples)
     {
+        Logger.SuppressInfo(true);
         //TEST COMPLEX DIFFUSE
         scene.AddRenderable(new Plane(new Vector3(0, 1, 0), new Vector3(0, 0, 0), new DiffuseMaterial(new Color(.85f, .85f, .85f))));
         scene.AddRenderable(new Sphere(new Vector3(0, 1.5f, 0), 1.5f, new DiffuseMaterial(new Color(0, .95f, .95f))));
