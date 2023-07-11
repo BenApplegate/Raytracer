@@ -11,13 +11,13 @@ class Program
 {
     public static void Main(string[] args)
     {
-
+        var watch = Stopwatch.StartNew();
         Logger.Info("Raytracer Initializing");
-        Logger.SuppressInfo(true);
+        //Logger.SuppressInfo(true);
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 2;
+        int samples = 500;
         
         // UnlitTestScene(scene, samples);
 
@@ -32,6 +32,9 @@ class Program
         //ProjectionTestScene(scene, samples);
 
         //scene.SaveAllCameras(samples);
+        
+        watch.Stop();
+        Logger.Info($"Render took {watch.Elapsed}");
     }
 
     private static void ProjectionTestScene(Scene scene, int samples)
@@ -107,20 +110,22 @@ class Program
     private static void ComplexDiffuseSceneProgressive(Scene scene, int samples)
     {
         //TEST COMPLEX DIFFUSE
-        scene.AddRenderable(new Sphere(new Vector3(0, -20, 0), 23, new DiffuseMaterial(new Color(1, 1, 1))));
+        scene.AddRenderable(new Plane(new Vector3(0, 1, 0), new Vector3(0, 3, 0), new DiffuseMaterial(new Color(1, 1, 1))));
         scene.AddRenderable(new Sphere(new Vector3(0, 5, 0), 1.5f, new DiffuseMaterial(new Color(1, .1f, .1f))));
         scene.AddRenderable(new Sphere(new Vector3(3, 4.5f, 1), 1, new DiffuseMaterial(new Color(.1f, .1f, 1))));
         scene.AddRenderable(new Sphere(new Vector3(-4, 4, -.5f), .75f, new DiffuseMaterial(new Color(.1f, 1, .1f))));
         //scene.AddRenderable(new Sphere(new Vector3(-20, 20, 30), 10, new EmissiveMaterial(new Color(1, 1, 1), 35)));
-        scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 30f, dayStrength: .025f, nightStrength: 0));
-
-        // Camera cam1 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
-        // Camera cam2 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
-        Camera cam3 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1920, 1080);
+        scene.SetEnvironment(new SkyEnvironmentMaterial(sunStrength: 100f, dayStrength: .075f, nightStrength: 0));
+        //scene.SetEnvironment(new AmbientEnvironmentMaterial(new Color(1, 1, 1)));
+        
+        Camera cam3 = new Camera(new Vector3(-1, 7, -10), new Vector3(20, 0, 0), 80, 1280, 720);
 
         scene.AddCamera(cam3);
 
-        scene.RenderAllCamerasProgressive(5, samples, 12, "", 5);
+        scene.RenderAllCameras(5, samples, 32);
+        
+        scene.SaveAllCameras(samples);
+        //scene.RenderAllCamerasProgressive(5, samples, 32, "", 5);
         
     }
 

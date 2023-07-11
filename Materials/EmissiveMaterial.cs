@@ -19,10 +19,6 @@ public class EmissiveMaterial : Material
     {
         ray.color *= _color;
         ray.gatheredColor += (ray.color * _strength);
-    }
-
-    public void UpdateNextRay(ref Ray ray, ref RayHit hit)
-    {
         hit.rayShouldContinue = false;
     }
 

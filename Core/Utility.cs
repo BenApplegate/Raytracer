@@ -4,11 +4,13 @@ namespace Raytracer.Core;
 
 public static class Utility
 {
-    private static Random _random = new Random();
+    public static Random _globalRandom = Random.Shared;
+    [ThreadStatic] public static Random? _random;
 
     //Returns a random normalized direction vector
     public static Vector3 RandomDirection()
     {
+        if (_random is null) _random = new Random(_globalRandom.Next());
         float theta = (float)_random.NextDouble() * 2 * MathF.PI;
         float phi = (float)_random.NextDouble() * MathF.PI;
 
@@ -17,6 +19,11 @@ public static class Utility
         float y = MathF.Cos(phi);
 
         return new Vector3(x, y, z);
+    }
+
+    public static void ResetRandom(int seed)
+    {
+        _random = new Random(seed);
     }
 
     public static float ComponentSum(this Vector3 v)

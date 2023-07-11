@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
+using ThreadState = Raytracer.Structs.ThreadState;
 
 namespace Raytracer.Core;
 
@@ -119,7 +120,14 @@ public class Scene
         }
 
         //Create list to store all tasks
-        List<Task> tasks = new List<Task>();
+        Thread[] threads = new Thread[threadCount]; 
+        
+        //Fill threads list with threads
+        for (int i = 0; i < threadCount; i++)
+        {
+            threads[i] = new Thread(TraceRay);
+        }
+        
         
         //Iterate over every ray from the camera and run raytracing algorithm
         var rays = _cameras[camIndex].GetCameraRays();
@@ -131,28 +139,42 @@ public class Scene
                 Logger.Info($"Now running ray {i+1}/{rays.Count}");
             }
 
-            if (tasks.Count >= threadCount)
+            //Find open thread
+            int openThread = -1;
+            
+            do
             {
-                //Wait for existing tasks to finish
-                foreach (Task t in tasks)
+                for (int threadIndex = 0; threadIndex < threadCount; threadIndex++)
                 {
-                    t.Wait();
+                    if (!threads[threadIndex].IsAlive)
+                    {
+                        threads[threadIndex] = new Thread(TraceRay);
+                        openThread = threadIndex;
+                        break;
+                    }
                 }
                 
-                //Clear now old tasks from list
-                tasks.Clear();
-            }
-            
-            //Add each ray to thread pool
-            var task = Task.Run(() => TraceRay(maxLightBounces, sampleCount, rays, rayIndex, renderPass));
+                //if(openThread == -1) Logger.Error("Failed to not find open thread");
+            } while (openThread == -1);
 
-            tasks.Add(task);
+            //Logger.Warn("Made it here");
+
+            //Start thread
+            threads[openThread].Start(new ThreadState()
+            {
+                maxLightBounces = maxLightBounces,
+                sampleCount = sampleCount,
+                rays = rays,
+                rayIndex = rayIndex,
+                pass = renderPass
+            });
+
             //TraceRay(maxLightBounces, sampleCount, ref rays, i);
         }
         //Wait for all tasks to finish
-        foreach (Task t in tasks)
+        foreach (Thread t in threads)
         {
-            t.Wait();
+            t.Join();
         }
         
         Logger.Info($"Finished Rendering Camera");
@@ -160,8 +182,25 @@ public class Scene
         _cameras[camIndex].HandleProcessedRays(rays, sampleCount);
     }
 
-    private void TraceRay(int maxLightBounces, int sampleCount, List<Ray> rays, int rayIndex, int pass = 0)
+    private void TraceRay(object? state)
     {
+
+        //int maxLightBounces, int sampleCount, List<Ray> rays, int rayIndex, int pass = 0
+        if (state is null || !(state is ThreadState))
+        {
+            Logger.Error("Thread provided with invalid state");
+        }
+
+        ThreadState threadState = (ThreadState)state!;
+        int maxLightBounces = threadState.maxLightBounces;
+        int sampleCount = threadState.sampleCount;
+        List<Ray> rays = threadState.rays;
+        int rayIndex = threadState.rayIndex;
+        int pass = threadState.pass;
+
+        Utility._random = new Random(rayIndex + Utility._globalRandom.Next());
+        
+        
         List<Ray> samples = new List<Ray>();
         for (int sample = 0; sample < sampleCount; sample++)
         {
@@ -204,8 +243,6 @@ public class Scene
                     {
                         //Process lighting info for hit
                         closestHit.material?.ProcessLighting(ref ray, ref closestHit);
-
-                        closestHit.material?.UpdateNextRay(ref ray, ref closestHit);
                     }
                     else if (pass == 1)
                     {
@@ -227,7 +264,6 @@ public class Scene
                         if (pass == 0)
                         {
                             _environment.ProcessLighting(ref ray, ref closestHit);
-                            _environment.UpdateNextRay(ref ray, ref closestHit);
                         }
                         else if (pass == 1)
                         {
@@ -255,6 +291,11 @@ public class Scene
 
                 //Save ray info back into this sample
                 samples[sample] = ray;
+
+                if (!closestHit.rayShouldContinue)
+                {
+                    break;
+                }
             }
         }
 

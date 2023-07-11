@@ -40,7 +40,7 @@ public class SkyEnvironmentMaterial : Material
     
     public void ProcessLighting(ref Ray ray, ref RayHit hit)
     {
-        
+        hit.rayShouldContinue = false;
 
         float t = Vector3.Dot(ray.direction, new Vector3(0, 1, 0));
         
@@ -78,11 +78,6 @@ public class SkyEnvironmentMaterial : Material
         
         ray.gatheredColor += ray.color * skyColor * dayStrength;
 
-    }
-
-    public void UpdateNextRay(ref Ray ray, ref RayHit hit)
-    {
-        hit.rayShouldContinue = false;
     }
 
     public void ProcessAlbedo(ref Ray ray, ref RayHit hit)

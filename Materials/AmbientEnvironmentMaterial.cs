@@ -17,10 +17,6 @@ public class AmbientEnvironmentMaterial : Material
     public void ProcessLighting(ref Ray ray, ref RayHit hit)
     {
         ray.gatheredColor += ray.color * _color;
-    }
-
-    public void UpdateNextRay(ref Ray ray, ref RayHit hit)
-    {
         hit.rayShouldContinue = false;
     }
 

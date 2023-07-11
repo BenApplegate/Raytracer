@@ -19,10 +19,6 @@ public class UnlitMaterial : Material
         
         ray.color *= _color;
         ray.gatheredColor += _color;
-    }
-
-    public void UpdateNextRay(ref Ray ray, ref RayHit hit)
-    {
         hit.rayShouldContinue = false;
     }
 

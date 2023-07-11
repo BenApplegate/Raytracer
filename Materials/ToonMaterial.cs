@@ -17,10 +17,7 @@ public class ToonMaterial : Material
     public void ProcessLighting(ref Ray ray, ref RayHit hit)
     {
         ray.color *= _albedo * Vector3.Dot(hit.hitNormal, ray.direction) * -1;
-    }
-
-    public void UpdateNextRay(ref Ray ray, ref RayHit hit)
-    {
+        
         //Update next ray to be in a random direction in the hemisphere around the normal
         Vector3 randomRay = Utility.RandomDirection();
         
