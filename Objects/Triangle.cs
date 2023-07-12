@@ -41,7 +41,7 @@ public class Triangle : Renderable
         Vector3 rayDot = ray.direction * _normal;
         float t = normalDot.ComponentSum() / rayDot.ComponentSum();
 
-        if (t < 0)
+        if (t < -0.001)
         {
             // Logger.Warn("Skipped due to negative t");
             return new RayHit()
@@ -55,9 +55,13 @@ public class Triangle : Renderable
         Vector3 p12 = _p2 - _p1;
         Vector3 p13 = _p3 - _p1;
         Vector3 p1T = hitPos - _p1;
+
+        Vector3 cross1 = Vector3.Cross(p12, p1T);
+        Vector3 cross2 = Vector3.Cross(p13, p1T);
+        if(cross1.Length() > 0.0001) cross1 /= cross1.Length();
+        if(cross2.Length() > 0.0001) cross2 /= cross2.Length();
         
-        
-        if(Vector3.Dot(Vector3.Cross(p12, p1T), Vector3.Cross(p13, p1T)) > 0)
+        if(Vector3.Dot(cross1, cross2) > 0.999)
         {
             return new RayHit()
             {
@@ -69,7 +73,12 @@ public class Triangle : Renderable
         Vector3 p23 = _p3 - _p2;
         Vector3 p2T = hitPos - _p2;
 
-        if (Vector3.Dot(Vector3.Cross(p21, p2T), Vector3.Cross(p23, p2T)) > 0)
+        cross1 = Vector3.Cross(p21, p2T);
+        cross2 = Vector3.Cross(p23, p2T);
+        if(cross1.Length() > 0.0001) cross1 /= cross1.Length();
+        if(cross2.Length() > 0.0001) cross2 /= cross2.Length();
+        
+        if (Vector3.Dot(cross1, cross2) > 0.999)
         {
             return new RayHit()
             {
@@ -82,7 +91,12 @@ public class Triangle : Renderable
         Vector3 p32 = _p2 - _p3;
         Vector3 p3T = hitPos - _p3;
 
-        if (Vector3.Dot(Vector3.Cross(p31, p3T), Vector3.Cross(p32, p2T)) > 0)
+        cross1 = Vector3.Cross(p31, p3T);
+        cross2 = Vector3.Cross(p32, p2T);
+        if(cross1.Length() > 0.0001) cross1 /= cross1.Length();
+        if(cross2.Length() > 0.0001) cross2 /= cross2.Length();
+        
+        if (Vector3.Dot(cross1, cross2) > 0.999)
         {
             return new RayHit()
             {

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
-using ThreadState = Raytracer.Structs.ThreadState;
 
 namespace Raytracer.Core;
 

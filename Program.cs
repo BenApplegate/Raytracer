@@ -17,7 +17,7 @@ class Program
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 10;
+        int samples = 2;
         
         // UnlitTestScene(scene, samples);
 
@@ -36,21 +36,20 @@ class Program
         //scene.SaveAllCameras(samples);
         
         watch.Stop();
-        Logger.Info($"Render took {watch.Elapsed}");
+        Logger.Important($"Render took {watch.Elapsed}");
     }
 
     private static void TriangleTestScene(Scene scene, int samples)
     {
         Logger.SuppressInfo(true);
-        float scale = 5;
         
-        scene.AddCamera(new Camera(new Vector3(0, 2, 10), new Vector3(0, 180, 0), 90, 1920, 1080));
+
+        scene.AddCamera(new Camera(new Vector3(0, 5, -15), new Vector3(0, 0, 0), 90, 1920, 1080));
+        scene.AddRenderable(new Sphere(new Vector3(0, 3f, 0), 2, new DiffuseMaterial(new Color(0, 0, .98f))));
         
-        scene.AddRenderable(new Triangle(new Vector3(-scale, 0, -scale), new Vector3(scale, 0, -scale), new Vector3(-scale, 0, scale), new DiffuseMaterial(new Color(.95f, .95f, .95f))));
-        scene.AddRenderable(new Triangle(new Vector3(scale, 0, -scale), new Vector3(scale, 0, scale), new Vector3(-scale, 0, scale), new DiffuseMaterial(new Color(.95f, .95f, .95f))));
-        scene.AddRenderable(new Sphere(new Vector3(0, 2f, 0), 2, new DiffuseMaterial(new Color(.05f, .05f, .85f))));
-        
-        scene.SetEnvironment(new SkyEnvironmentMaterial());
+        scene.AddRenderable(new CornellBox(Vector3.Zero, 10, 5, 5, 3));
+
+        //scene.SetEnvironment(new AmbientEnvironmentMaterial(new Color(3, 3, 3)));
         
         scene.RenderAllCamerasProgressive(5, samples, 30, "", 5);
     }
