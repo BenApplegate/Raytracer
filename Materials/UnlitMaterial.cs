@@ -1,4 +1,5 @@
 ﻿using Raytracer.Core;
+using Raytracer.GPU;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
 
@@ -33,5 +34,10 @@ public class UnlitMaterial : Material
         float g = hit.hitNormal.Y * .5f + .5f;
         float b = hit.hitNormal.Z * .5f + .5f;
         ray.gatheredColor = new Color(r, g, b);
+    }
+
+    public GPUMaterial GetGPUMaterial()
+    {
+        return new GPUMaterial() { type = 0, color = _color };
     }
 }

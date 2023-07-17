@@ -1,6 +1,6 @@
 ﻿namespace Raytracer.Core;
 
-public class Color
+public struct Color
 {
     public float r;
     public float g;

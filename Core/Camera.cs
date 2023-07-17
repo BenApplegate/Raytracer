@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Net;
 using System.Numerics;
+using Raytracer.GPU;
 using Raytracer.Structs;
 
 namespace Raytracer.Core;
@@ -97,6 +98,22 @@ public class Camera
                 c /= samples + _startingImageSampleCount!.Value;
             }
             _canvas.SetPixel(ray.canvasX, ray.canvasY, c);
+        }
+    }
+
+    public void HandleProcessedRays(GPUResult[] results, int samples)
+    {
+        foreach (GPUResult ray in results)
+        {
+            Color c = ray.color;
+            if (_startingImage is not null)
+            {
+                var pColor = _startingImage.GetPixel(ray.x, ray.y);
+                c *= samples;
+                c += new Color(pColor.R / 255f, pColor.G / 255f, pColor.B / 255f) * _startingImageSampleCount!.Value;
+                c /= samples + _startingImageSampleCount!.Value;
+            }
+            _canvas.SetPixel(ray.x, ray.y, c);
         }
     }
     

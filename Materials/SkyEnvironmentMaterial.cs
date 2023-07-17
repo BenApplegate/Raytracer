@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Raytracer.Core;
+using Raytracer.GPU;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
 
@@ -25,12 +26,12 @@ public class SkyEnvironmentMaterial : Material
         Color? highDayColor = null, Color? lowDayColor = null, float? dayStrength = null, Color? sunColor = null,
         Vector3? sunDirection = null, float? sunStrength = null, float? sunSize = null)
     {
-        if (nightColor is not null) this.nightColor = nightColor;
+        if (nightColor is not null) this.nightColor = nightColor.Value;
         if (nightStrength is not null) this.nightStrength = nightStrength.Value;
-        if (highDayColor is not null) this.highDayColor = highDayColor;
-        if (lowDayColor is not null) this.lowDayColor = lowDayColor;
+        if (highDayColor is not null) this.highDayColor = highDayColor.Value;
+        if (lowDayColor is not null) this.lowDayColor = lowDayColor.Value;
         if (dayStrength is not null) this.dayStrength = dayStrength.Value;
-        if (sunColor is not null) this.sunColor = sunColor;
+        if (sunColor is not null) this.sunColor = sunColor.Value;
         if (sunDirection is not null) this.sunDirection = sunDirection.Value;
         if (sunStrength is not null) this.sunStrength = sunStrength.Value;
         if (sunSize is not null) this.sunSize = sunSize.Value;
@@ -112,5 +113,10 @@ public class SkyEnvironmentMaterial : Material
     public void ProcessNormal(ref Ray ray, ref RayHit hit)
     {
         ray.gatheredColor = new Color(0, 0, 0);
+    }
+
+    public GPUMaterial GetGPUMaterial()
+    {
+        throw new NotImplementedException();
     }
 }

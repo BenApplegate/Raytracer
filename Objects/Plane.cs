@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Raytracer.Core;
+using Raytracer.GPU;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
 
@@ -55,5 +56,10 @@ public class Plane : Renderable
             material = _material,
             rayShouldContinue = true
         };
+    }
+
+    public (GPURenderable, GPUMaterial) GetGPUData()
+    {
+        throw new NotImplementedException();
     }
 }

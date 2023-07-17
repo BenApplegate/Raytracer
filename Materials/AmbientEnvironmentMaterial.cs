@@ -1,4 +1,5 @@
 ﻿using Raytracer.Core;
+using Raytracer.GPU;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
 
@@ -28,5 +29,10 @@ public class AmbientEnvironmentMaterial : Material
     public void ProcessNormal(ref Ray ray, ref RayHit hit)
     {
         ray.gatheredColor = new Color(0, 0, 0);
+    }
+
+    public GPUMaterial GetGPUMaterial()
+    {
+        throw new NotImplementedException();
     }
 }

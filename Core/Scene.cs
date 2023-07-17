@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Raytracer.GPU;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
 
@@ -287,5 +288,27 @@ public class Scene
         {
             _cameras[i].SaveImage(location+$"{_name}_cam{i}.png", samples);
         }
+    }
+    
+    public Ray[] GetGPURays()
+    {
+        if (_cameras.Count < 1)
+        {
+            Logger.Warn("No camera in scene, cannot return rays");
+            return Array.Empty<Ray>();
+        }
+
+        List<Ray> camRays = _cameras[0].GetCameraRays();
+        return camRays.ToArray();
+    }
+
+    public void HandleGPUResult(GPUResult[] results, int samples)
+    {
+        _cameras[0].HandleProcessedRays(results, samples);
+    }
+
+    public List<Renderable> GetRenderables()
+    {
+        return _renderables;
     }
 }

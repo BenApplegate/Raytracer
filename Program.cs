@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Raytracer;
 using Raytracer.Core;
+using Raytracer.GPU;
 using Raytracer.Materials;
 using Raytracer.Objects;
 using Plane = Raytracer.Objects.Plane;
@@ -31,7 +32,9 @@ class Program
 
         //ProjectionTestScene(scene, samples);
 
-        TriangleTestScene(scene, samples);
+        // TriangleTestScene(scene, samples);
+
+        GpuRendererTest(scene, samples);
         
         //scene.SaveAllCameras(samples);
         
@@ -39,6 +42,32 @@ class Program
         Logger.Important($"Render took {watch.Elapsed}");
     }
 
+    private static void GpuRendererTest(Scene scene, int samples)
+    {
+        Logger.SuppressInfo(true);
+        
+        scene.AddCamera(new Camera(new Vector3(15, 0, 0), new Vector3(0, -90, 0), 90, 1920, 1080));
+        scene.AddCamera(new Camera(new Vector3(15, 0, 0), new Vector3(0, -90, 0), 90, 1920, 1080));
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1, new UnlitMaterial(new Color(0f, 0, 1f))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, -2), .25f, new UnlitMaterial(new Color(0f, 1, 0))));
+        scene.AddRenderable(new Sphere(new Vector3(0, 0, 3), .5f, new UnlitMaterial(new Color(1f, 0, 0f))));
+        scene.AddRenderable(new Sphere(new Vector3(5, 1, 0), 2f, new UnlitMaterial(new Color(1f, 1, 0f))));
+        scene.AddRenderable(new Sphere(new Vector3(-3, -2, 0), 1f, new UnlitMaterial(new Color(0f, 1, 1f))));
+        
+        Stopwatch watch = Stopwatch.StartNew();
+        scene.RenderCamera(1, 0, 1, 12);
+        watch.Stop();
+        
+        Logger.Important($"CPU render took {watch.Elapsed}");
+        
+        GPURenderer.Initialize(scene);
+        var renderResult = GPURenderer.Render();
+        scene.HandleGPUResult(renderResult, 0);
+        scene.SaveAllCameras(0);
+        
+        GPURenderer.Dispose();
+    }
+    
     private static void TriangleTestScene(Scene scene, int samples)
     {
         Logger.SuppressInfo(true);

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Raytracer.Core;
+using Raytracer.GPU;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
 
@@ -57,5 +58,10 @@ public class Mesh : Renderable
         }
 
         return closestHit;
+    }
+
+    public (GPURenderable, GPUMaterial) GetGPUData()
+    {
+        throw new NotImplementedException();
     }
 }

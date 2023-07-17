@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Raytracer.Core;
+using Raytracer.GPU;
 using Raytracer.Interfaces;
 using Raytracer.Structs;
 
@@ -56,5 +57,17 @@ public class Sphere : Renderable
         RayHit hit = new RayHit() { didHit = true, hitLocation = hitPos, distance = distance, hitNormal = normalVector, material = _material, rayShouldContinue = true};
         
         return hit;
+    }
+
+    public (GPURenderable, GPUMaterial) GetGPUData()
+    {
+        GPURenderable renderable = new GPURenderable
+        {
+            origin = _location,
+            radius = _radius,
+            objectType = 0
+        };
+
+        return (renderable, _material.GetGPUMaterial());
     }
 }
