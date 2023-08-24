@@ -46,6 +46,6 @@ public class DiffuseMaterial : Material
 
     public GPUMaterial GetGPUMaterial()
     {
-        throw new NotImplementedException();
+        return new GPUMaterial() { type = 1, color = _albedo };
     }
 }

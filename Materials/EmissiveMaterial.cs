@@ -38,6 +38,6 @@ public class EmissiveMaterial : Material
 
     public GPUMaterial GetGPUMaterial()
     {
-        throw new NotImplementedException();
+        return new GPUMaterial() { type = 2, color = _color, roughness = 0, strength = _strength };
     }
 }

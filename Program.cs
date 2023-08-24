@@ -18,7 +18,7 @@ class Program
 
         Scene scene = new Scene("BasicScene");
 
-        int samples = 2;
+        int samples = 10;
         
         // UnlitTestScene(scene, samples);
 
@@ -46,24 +46,23 @@ class Program
     {
         Logger.SuppressInfo(true);
         
-        scene.AddCamera(new Camera(new Vector3(15, 0, 0), new Vector3(0, -90, 0), 90, 1920, 1080));
-        scene.AddCamera(new Camera(new Vector3(15, 0, 0), new Vector3(0, -90, 0), 90, 1920, 1080));
-        scene.AddRenderable(new Sphere(new Vector3(0, 0, 0), 1, new UnlitMaterial(new Color(0f, 0, 1f))));
-        scene.AddRenderable(new Sphere(new Vector3(0, 0, -2), .25f, new UnlitMaterial(new Color(0f, 1, 0))));
-        scene.AddRenderable(new Sphere(new Vector3(0, 0, 3), .5f, new UnlitMaterial(new Color(1f, 0, 0f))));
-        scene.AddRenderable(new Sphere(new Vector3(5, 1, 0), 2f, new UnlitMaterial(new Color(1f, 1, 0f))));
-        scene.AddRenderable(new Sphere(new Vector3(-3, -2, 0), 1f, new UnlitMaterial(new Color(0f, 1, 1f))));
+        scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 80, 1920, 1080));;
+        scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 80, 1920, 1080));
+
+        scene.AddRenderable(new Sphere(new Vector3(0, -101, 0), 100, new DiffuseMaterial(new Color(0, .2f, 1f))));
+        scene.AddRenderable(new Sphere(new Vector3(-2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 2)));
+        scene.AddRenderable(new Sphere(new Vector3(2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 1)));
         
         Stopwatch watch = Stopwatch.StartNew();
-        scene.RenderCamera(1, 0, 1, 12);
+        // scene.RenderCamera(1, 3, samples, 12);
         watch.Stop();
         
         Logger.Important($"CPU render took {watch.Elapsed}");
         
         GPURenderer.Initialize(scene);
-        var renderResult = GPURenderer.Render();
-        scene.HandleGPUResult(renderResult, 0);
-        scene.SaveAllCameras(0);
+        var renderResult = GPURenderer.Render(samples, 3);
+        scene.HandleGPUResult(renderResult, samples);
+        scene.SaveAllCameras(samples);
         
         GPURenderer.Dispose();
     }

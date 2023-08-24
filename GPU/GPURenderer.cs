@@ -17,7 +17,7 @@ public static class GPURenderer
     private static MemoryBuffer1D<GPUResult, Stride1D.Dense> _resultBuffer;
     private static MemoryBuffer1D<GPURenderable, Stride1D.Dense> _renderableBuffer;
     private static MemoryBuffer1D<GPUMaterial, Stride1D.Dense> _materialBuffer;
-    private static Action<Index1D, ArrayView<Ray>, ArrayView<GPURenderable>, ArrayView<GPUMaterial>, ArrayView<GPUResult>> _loadedKernel;
+    private static Action<Index1D, ArrayView<Ray>, ArrayView<GPURenderable>, ArrayView<GPUMaterial>, ArrayView<GPUResult>, int, int> _loadedKernel;
 
     public static void Initialize(Scene scene)
     {
@@ -59,14 +59,14 @@ public static class GPURenderer
         
         //Load Kernel
         _loadedKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<Ray>, ArrayView<GPURenderable>,
-            ArrayView<GPUMaterial>, ArrayView<GPUResult>>(Kernel);
+            ArrayView<GPUMaterial>, ArrayView<GPUResult>, int, int>(Kernel);
     }
 
-    public static GPUResult[] Render()
+    public static GPUResult[] Render(int samples, int maxLightBounces)
     {
         Stopwatch watch = Stopwatch.StartNew();
         _loadedKernel((int) _rayBuffer.Length, _rayBuffer.View, _renderableBuffer.View, _materialBuffer.View,
-            _resultBuffer.View);
+            _resultBuffer.View, samples, maxLightBounces);
         
         _accelerator.Synchronize();
         watch.Stop();
@@ -79,39 +79,66 @@ public static class GPURenderer
     }
 
     private static void Kernel(Index1D index, ArrayView<Ray> rays, ArrayView<GPURenderable> renderables,
-        ArrayView<GPUMaterial> materials, ArrayView<GPUResult> output)
+        ArrayView<GPUMaterial> materials, ArrayView<GPUResult> output, int samples, int maxLightBounces)
     {
         Ray ray = rays[index];
         GPUResult rayResult;
-        
-        //Find closest hit among renderables
-        GPUHit closesetHit = new GPUHit() { didHit = false, distance = float.PositiveInfinity};
-        GPURenderable closestRenderable = new GPURenderable();
+        rayResult.color = new Color(0, 0, 0);
 
-        for (int i = 0; i < renderables.IntLength; i++)
+        //Loop for every sample
+        for (int sample = 0; sample < samples; sample++)
         {
-            GPURenderable renderable = renderables[i];
-            GPUHit hit = GPUHit.GetHit(ray, renderable);
-            if(!hit.didHit) continue;
-            if (hit.distance < closesetHit.distance)
+            Ray sampleRay = ray;
+            Color rayColor = new Color(1, 1, 1);
+            Color gatheredColor = new Color(0, 0, 0);
+            //Loop for every possible bounce
+            for (int bounce = 0; bounce <= maxLightBounces; bounce++)
             {
-                closesetHit = hit;
-                closestRenderable = renderable;
-            }
-        }
-        
-        //We now have the closest renderable object
-        Color rayColor = new Color(1, 1, 1);
-        Color gatheredColor = new Color(0, 0, 0);
+                //Find closest hit among renderables
+                GPUHit closesetHit = new GPUHit() { didHit = false, distance = float.PositiveInfinity};
+                GPURenderable closestRenderable = new GPURenderable();
 
-        if (closesetHit.didHit)
-        {
-            gatheredColor += GPUMaterial.GetAddedGatheredLight(rayColor, ray, materials[closestRenderable.materialIndex]);
+                for (int i = 0; i < renderables.IntLength; i++)
+                {
+                    GPURenderable renderable = renderables[i];
+                    GPUHit hit = GPUHit.GetHit(sampleRay, renderable);
+                    if(!hit.didHit) continue;
+                    if (hit.distance < closesetHit.distance)
+                    {
+                        closesetHit = hit;
+                        closestRenderable = renderable;
+                    }
+                }
+        
+                //We now have the closest renderable object
+
+                if (closesetHit.didHit)
+                {
+                    GPUMaterialResult result = GPUMaterial.GetAddedGatheredLight(rayColor, closesetHit, materials[closestRenderable.materialIndex]);
+                    if (!result.shouldContinue)
+                    {
+                        if (result.setFinalColor)
+                        {
+                            gatheredColor = result.gatheredColor;
+                        }
+                        break;
+                    }
+                    rayColor = result.gatheredColor;
+                    sampleRay.origin = result.continueOrigin; 
+                    sampleRay.direction = result.continueDirection;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            rayResult.color += gatheredColor;
         }
 
         output[index] = new GPUResult()
         {
-            color = gatheredColor,
+            color = rayResult.color / samples,
             x = ray.canvasX,
             y = ray.canvasY
         };
