@@ -46,6 +46,6 @@ public class DiffuseMaterial : Material
 
     public GPUMaterial GetGPUMaterial()
     {
-        return new GPUMaterial() { type = 1, color = _albedo };
+        return new GPUMaterial() { type = 1, color = _albedo, roughness = 0.1f};
     }
 }

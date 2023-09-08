@@ -36,7 +36,7 @@ class Program
 
         GpuRendererTest(scene, samples);
         
-        //scene.SaveAllCameras(samples);
+        // scene.SaveAllCameras(samples);
         
         watch.Stop();
         Logger.Important($"Render took {watch.Elapsed}");
@@ -50,8 +50,8 @@ class Program
         scene.AddCamera(new Camera(new Vector3(0, 0, -10), Vector3.Zero, 80, 1920, 1080));
 
         scene.AddRenderable(new Sphere(new Vector3(0, -101, 0), 100, new DiffuseMaterial(new Color(0, .2f, 1f))));
-        scene.AddRenderable(new Sphere(new Vector3(-2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 2)));
-        scene.AddRenderable(new Sphere(new Vector3(2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 1)));
+        scene.AddRenderable(new Sphere(new Vector3(-2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 40)));
+        scene.AddRenderable(new Sphere(new Vector3(2, 1, 0), .5f, new EmissiveMaterial(new Color(1, 1, 1), 20)));
         
         Stopwatch watch = Stopwatch.StartNew();
         // scene.RenderCamera(1, 3, samples, 12);

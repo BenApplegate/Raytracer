@@ -17,7 +17,7 @@ public static class GPURenderer
     private static MemoryBuffer1D<GPUResult, Stride1D.Dense> _resultBuffer;
     private static MemoryBuffer1D<GPURenderable, Stride1D.Dense> _renderableBuffer;
     private static MemoryBuffer1D<GPUMaterial, Stride1D.Dense> _materialBuffer;
-    private static Action<Index1D, ArrayView<Ray>, ArrayView<GPURenderable>, ArrayView<GPUMaterial>, ArrayView<GPUResult>, int, int> _loadedKernel;
+    private static Action<Index1D, ArrayView<Ray>, ArrayView<GPURenderable>, ArrayView<GPUMaterial>, ArrayView<GPUResult>, int, int, uint> _loadedKernel;
 
     public static void Initialize(Scene scene)
     {
@@ -59,14 +59,14 @@ public static class GPURenderer
         
         //Load Kernel
         _loadedKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<Ray>, ArrayView<GPURenderable>,
-            ArrayView<GPUMaterial>, ArrayView<GPUResult>, int, int>(Kernel);
+            ArrayView<GPUMaterial>, ArrayView<GPUResult>, int, int, uint>(Kernel);
     }
 
     public static GPUResult[] Render(int samples, int maxLightBounces)
     {
         Stopwatch watch = Stopwatch.StartNew();
         _loadedKernel((int) _rayBuffer.Length, _rayBuffer.View, _renderableBuffer.View, _materialBuffer.View,
-            _resultBuffer.View, samples, maxLightBounces);
+            _resultBuffer.View, samples, maxLightBounces, (uint)Utility._globalRandom.Next());
         
         _accelerator.Synchronize();
         watch.Stop();
@@ -79,12 +79,15 @@ public static class GPURenderer
     }
 
     private static void Kernel(Index1D index, ArrayView<Ray> rays, ArrayView<GPURenderable> renderables,
-        ArrayView<GPUMaterial> materials, ArrayView<GPUResult> output, int samples, int maxLightBounces)
+        ArrayView<GPUMaterial> materials, ArrayView<GPUResult> output, int samples, int maxLightBounces, uint randomState)
     {
         Ray ray = rays[index];
         GPUResult rayResult;
         rayResult.color = new Color(0, 0, 0);
-
+        
+        //Start state at pixel index plus specified starting offset
+        uint randState = (uint) (ray.canvasX + ray.canvasY * ray.canvasX);
+        
         //Loop for every sample
         for (int sample = 0; sample < samples; sample++)
         {
@@ -94,6 +97,10 @@ public static class GPURenderer
             //Loop for every possible bounce
             for (int bounce = 0; bounce <= maxLightBounces; bounce++)
             {
+                //Get random data for bounce
+                GPURandomResult bounceRandom = GPURandom.GetRandom(randState);
+                randState = bounceRandom.nextState;
+                
                 //Find closest hit among renderables
                 GPUHit closesetHit = new GPUHit() { didHit = false, distance = float.PositiveInfinity};
                 GPURenderable closestRenderable = new GPURenderable();
@@ -114,7 +121,7 @@ public static class GPURenderer
 
                 if (closesetHit.didHit)
                 {
-                    GPUMaterialResult result = GPUMaterial.GetAddedGatheredLight(rayColor, closesetHit, materials[closestRenderable.materialIndex]);
+                    GPUMaterialResult result = GPUMaterial.GetAddedGatheredLight(rayColor, closesetHit, materials[closestRenderable.materialIndex], bounceRandom, sampleRay);
                     if (!result.shouldContinue)
                     {
                         if (result.setFinalColor)
@@ -123,7 +130,7 @@ public static class GPURenderer
                         }
                         break;
                     }
-                    rayColor = result.gatheredColor;
+                    rayColor *= result.gatheredColor;
                     sampleRay.origin = result.continueOrigin; 
                     sampleRay.direction = result.continueDirection;
                 }
